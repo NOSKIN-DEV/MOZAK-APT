@@ -4,8 +4,8 @@
   "private": true,
   "description": "APT - Plataforma de descubrimiento de entretenimiento y actividades (prototipo/MVP)",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",

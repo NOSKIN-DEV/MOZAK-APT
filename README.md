@@ -49,6 +49,19 @@ npm run dev
 
 La aplicación quedará disponible en `http://localhost:3000`.
 
+> **Nota técnica:** el script `dev` usa el flag `--webpack` para desactivar
+> Turbopack (el bundler nuevo y por defecto en Next.js 16). Al momento de
+> crear este proyecto, Turbopack 16.0.1 presenta un bug conocido
+> (`inner_of_uppers_lost_follower`, reportado en el repositorio oficial de
+> Next.js) que provoca un panic en Windows, especialmente si el proyecto
+> vive dentro de una carpeta sincronizada por OneDrive/Dropbox/Google
+> Drive. Recomendaciones:
+> 1. **No desarrollar dentro de una carpeta sincronizada** (OneDrive,
+>    Dropbox, Google Drive). Mueve el proyecto a una ruta local simple,
+>    por ejemplo `C:\dev\apt-project`.
+> 2. Si en el futuro se actualiza Next.js y el bug ya está resuelto, se
+>    puede quitar `--webpack` de los scripts para volver a Turbopack.
+
 ## Variables de entorno
 
 Copiar `.env.example` a `.env.local` y ajustar según corresponda:
