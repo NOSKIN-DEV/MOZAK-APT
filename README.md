@@ -79,21 +79,26 @@ datos todavía.
 src/
   app/          Rutas y páginas (Next.js App Router)
   components/   Componentes de interfaz reutilizables
-  lib/          Lógica de negocio, repositorios, utilidades
-  types/        Modelos y tipos (Event, Venue, Source, Category)
-  data/         Datos mock locales
+  lib/
+    schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
+    repositories/      Abstracción EventRepository + MockEventRepository
+  types/         Modelos e interfaces (Event, Venue, Source, Category)
+  data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
 public/         Archivos estáticos
+scripts/
+  check-mock-data.ts   Valida los datos mock y prueba el repositorio (npm run check:data)
 ```
 
 ## Comandos disponibles
 
-| Comando           | Descripción                          |
-|-------------------|---------------------------------------|
-| `npm run dev`     | Levanta el servidor de desarrollo     |
-| `npm run build`   | Genera el build de producción         |
-| `npm run start`   | Sirve el build de producción          |
-| `npm run lint`    | Ejecuta ESLint                        |
-| `npm run test`    | Ejecuta las pruebas (Vitest)          |
+| Comando            | Descripción                                    |
+|---------------------|------------------------------------------------|
+| `npm run dev`       | Levanta el servidor de desarrollo               |
+| `npm run build`     | Genera el build de producción                   |
+| `npm run start`     | Sirve el build de producción                    |
+| `npm run lint`      | Ejecuta ESLint                                  |
+| `npm run test`      | Ejecuta las pruebas (Vitest)                    |
+| `npm run check:data`| Valida los datos mock y prueba filtros combinados |
 
 ## Pruebas
 
@@ -103,18 +108,16 @@ public/         Archivos estáticos
 
 *(Se incorporará en la Etapa 9.)*
 
-## Estado del prototipo — Etapa 1 ✅
+## Estado del prototipo
 
-Configuración base del proyecto: Next.js + TypeScript + Tailwind CSS,
-ESLint, estructura de carpetas y variables de entorno de ejemplo. Página
-de inicio placeholder para verificar que el proyecto arranca.
+- ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
+- ✅ **Etapa 2** — Estructura de datos mock: modelo conceptual (Event, Venue, Source, Category) tipado en TypeScript y validado con Zod; 24 eventos ficticios en 12 comunas de Santiago; abstracción `EventRepository`/`MockEventRepository` para no acoplar el resto de la app a los datos mock; script `check:data` que valida todo y prueba filtros combinados.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Datos mock de eventos (Etapa 2)
 - API interna `/api/events`, `/api/categories`, `/api/communes` (Etapa 3)
 - Interfaz principal: header, hero, buscador, listado (Etapa 4)
-- Búsqueda y filtros combinables (Etapa 5)
+- Búsqueda y filtros combinables en la UI (Etapa 5)
 - Página de detalle de evento (Etapa 6)
 - Ajustes responsive finos (Etapa 7)
 - Pruebas unitarias/integración (Etapa 8)
