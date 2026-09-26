@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "apt-theme";
+const STORAGE_KEY = "mozak-theme";
 
 function applyTheme(isDark: boolean) {
   document.documentElement.classList.toggle("dark", isDark);

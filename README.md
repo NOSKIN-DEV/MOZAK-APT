@@ -1,7 +1,9 @@
-# APT — Plataforma de descubrimiento de entretenimiento y actividades
+# MOZAK — Plataforma de descubrimiento de entretenimiento y actividades
 
-> Proyecto de Título (APT) — Ingeniería en Informática.
-> **Estado actual: prototipo/MVP en desarrollo (Etapa 1 de 10).**
+> Proyecto de Título (APT) de Ingeniería en Informática. "APT" es el
+> nombre académico del proyecto de título; "MOZAK" es el nombre de
+> marca mostrado en la interfaz.
+> **Estado actual: prototipo/MVP en desarrollo.**
 
 ## Descripción del proyecto
 
@@ -79,8 +81,9 @@ datos todavía.
 src/
   app/
     api/             API interna (Etapa 3): events, events/[id], categories, communes
-    page.tsx           Página principal (Etapa 4): header, hero, filtros y listado
-  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, ThemeToggle
+    page.tsx           Página principal (Etapa 4/5): header, hero, filtros y listado
+    eventos/[id]/      Página de detalle de evento (Etapa 6)
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, ThemeToggle
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository
@@ -127,10 +130,20 @@ Un query param inválido (ej. `isFree=si` o una fecha mal formada) responde
 `400` con el detalle del error; un id inexistente en `/api/events/[id]`
 responde `404`.
 
+## Página de detalle de evento
+
+`GET /eventos/[id]` (ej. `http://localhost:3000/eventos/event-001`) muestra
+el detalle completo de un evento: imagen, categoría, título, descripción,
+fecha, horario, lugar, dirección, comuna, precio, un mapa de ubicación
+(OpenStreetMap embebido, no requiere API key) y un botón "Ver sitio
+oficial" que abre `sourceUrl` en una pestaña nueva. Si el id no existe,
+muestra un mensaje claro de "Evento no encontrado" con un botón para
+volver al listado.
+
 ## Modo oscuro
 
 El botón 🌙/☀️ en el header alterna entre modo claro y oscuro. La
-preferencia se guarda en `localStorage` (clave `apt-theme`); si el
+preferencia se guarda en `localStorage` (clave `mozak-theme`); si el
 usuario nunca la cambió, se usa `prefers-color-scheme` del sistema
 operativo. Un script inline en `layout.tsx` aplica la clase `dark` en
 `<html>` antes de la primera pintura, para evitar el parpadeo del tema
@@ -162,10 +175,10 @@ incorrecto al cargar la página.
 - ✅ **Etapa 3** — API interna: `GET /api/events` (con filtros combinables), `GET /api/events/[id]`, `GET /api/categories`, `GET /api/communes`. Valida los query params con Zod (400 si son inválidos) y responde 404 si el evento no existe.
 - ✅ **Etapa 4** — Interfaz principal: header con navegación y buscador, hero con buscador principal, barra de filtros (categoría, comuna, fecha, gratis/pagado) y listado de tarjetas de eventos. La página consume `/api/events`, `/api/categories` y `/api/communes` (no importa los datos mock directamente).
 - ✅ **Etapa 5** — Búsqueda y filtros: la búsqueda (con debounce de 300ms) y los filtros (categoría, comuna, fecha, gratis/pagado) ya se combinan con AND contra `/api/events`. Contador de resultados, mensaje claro de "sin resultados" y botón "Limpiar filtros" funcionando. Además, se agregó **modo oscuro** (toggle en el header, se recuerda en `localStorage`, respeta la preferencia del sistema si el usuario no eligió antes) para no tener que reintegrarlo más adelante en cada componente.
+- ✅ **Etapa 6** — Página de detalle de evento (`/eventos/[id]`): imagen, título, descripción, categoría, fecha, horario, lugar, dirección, comuna, precio, mapa de ubicación (OpenStreetMap embebido, sin API key), fuente original y botón "Ver sitio oficial". Estados de carga, error y "evento no encontrado". Botón para volver al listado. También se puede volver al listado con una búsqueda aplicada desde el buscador del header.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Página de detalle de evento (Etapa 6)
 - Ajustes responsive finos (Etapa 7)
 - Pruebas unitarias/integración (Etapa 8)
 - Docker + docker-compose (Etapa 9)

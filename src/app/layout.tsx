@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "APT | Descubre qué hacer cerca de ti",
+  title: "MOZAK | Descubre qué hacer cerca de ti",
   description:
     "Plataforma de descubrimiento de eventos, cultura y entretenimiento (prototipo académico).",
 };
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const themeInitScript = `
 (function () {
   try {
-    var stored = localStorage.getItem("apt-theme");
+    var stored = localStorage.getItem("mozak-theme");
     var isDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", isDark);
   } catch (e) {}

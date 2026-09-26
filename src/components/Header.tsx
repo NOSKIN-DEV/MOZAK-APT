@@ -7,18 +7,17 @@ import { ThemeToggle } from "./ThemeToggle";
 interface HeaderProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
+  /** Opcional: en el listado no se usa (ya filtra en vivo); en otras páginas permite volver al listado con esta búsqueda aplicada. */
+  onSearchSubmit?: (value: string) => void;
 }
 
-export function Header({ searchValue, onSearchChange }: HeaderProps) {
+export function Header({ searchValue, onSearchChange, onSearchSubmit }: HeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-gray-50">
-            <span aria-hidden className="text-2xl">
-              📍
-            </span>
-            APT
+          <Link href="/" className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-50">
+            MOZAK
           </Link>
           <div className="flex items-center gap-3 sm:hidden">
             <nav className="text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -37,7 +36,7 @@ export function Header({ searchValue, onSearchChange }: HeaderProps) {
             </Link>
           </nav>
           <div className="w-full sm:max-w-xs">
-            <SearchBar size="sm" value={searchValue} onChange={onSearchChange} />
+            <SearchBar size="sm" value={searchValue} onChange={onSearchChange} onSubmit={onSearchSubmit} />
           </div>
           <div className="hidden sm:block">
             <ThemeToggle />

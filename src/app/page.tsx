@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
@@ -28,9 +29,14 @@ function buildQueryString(search: string, filters: FiltersState): string {
   return query ? `?${query}` : "";
 }
 
-export default function HomePage() {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+function HomePageContent() {
+  // Permite llegar desde otra página con una búsqueda ya aplicada,
+  // ej. /?search=teatro (ver src/app/eventos/[id]/page.tsx).
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") ?? "";
+
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [filters, setFilters] = useState<FiltersState>(initialFiltersState);
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
@@ -122,5 +128,16 @@ export default function HomePage() {
         hasActiveFiltersOrSearch={hasActiveFiltersOrSearch}
       />
     </div>
+  );
+}
+
+// Next.js exige envolver en <Suspense> cualquier componente que use
+// useSearchParams (se necesita para el flujo "buscar desde el detalle
+// de un evento y volver al listado con esa búsqueda aplicada").
+export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomePageContent />
+    </Suspense>
   );
 }
