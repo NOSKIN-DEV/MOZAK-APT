@@ -194,6 +194,13 @@ incorrecto al cargar la página.
 - ✅ **Etapa 6** — Página de detalle de evento (`/eventos/[id]`): imagen, título, descripción, categoría, fecha, horario, lugar, dirección, comuna, precio, mapa de ubicación (OpenStreetMap embebido, sin API key), fuente original y botón "Ver sitio oficial". Estados de carga, error y "evento no encontrado". Botón para volver al listado. También se puede volver al listado con una búsqueda aplicada desde el buscador del header.
 - ✅ **Etapa 7** — Ajustes responsive: los filtros ahora ocupan todo el ancho disponible en móvil (antes se veían angostos e irregulares) y se ajustan a su contenido en pantallas más anchas; el listado pasa de 1 columna (móvil) a 2 (tablet) a 3 (notebook) a 4 (escritorio grande); los botones de la página de detalle son de ancho completo en móvil para un mejor "tap target"; y se agregó una regla global (`overflow-x: hidden`) como resguardo contra scroll horizontal accidental. Ver la sección "Responsive" más abajo para cómo probarlo.
 
+## Documentación de la evaluación
+
+Además de este README, el proyecto cuenta con dos documentos vivos (Claude Docs) que se mantienen actualizados clase a clase:
+
+- **Sprint Backlog — MOZAK (APT)**: planificación Scrum (Product Backlog y Sprint Backlog), correlacionada con el plan de pruebas oficial del curso (32 casos MTC).
+- **Documentación Técnica — MOZAK (APT)**: Plan de Pruebas (estrategia y metodología de testing), Especificaciones Técnicas (requisitos funcionales/no funcionales, stack, historias de usuario), Modelo de Datos (diagrama entidad-relación, modelo lógico y físico PostgreSQL+PostGIS) y Arquitectura del Sistema (diagrama de componentes, diagrama de casos de uso, diagrama de proceso BPM y plan de dockerización).
+
 ## Próximas funcionalidades (no incluidas todavía)
 
 - Pruebas unitarias/integración (Etapa 8)
