@@ -77,17 +77,54 @@ datos todavía.
 
 ```
 src/
-  app/          Rutas y páginas (Next.js App Router)
+  app/
+    api/             API interna (Etapa 3): events, events/[id], categories, communes
+    ...               Rutas y páginas (Next.js App Router)
   components/   Componentes de interfaz reutilizables
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository
+    api/               Serialización de eventos y parseo de query params para la API
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
 public/         Archivos estáticos
 scripts/
   check-mock-data.ts   Valida los datos mock y prueba el repositorio (npm run check:data)
 ```
+
+## API interna
+
+Con el servidor corriendo (`npm run dev`), la API queda disponible en:
+
+| Endpoint                | Descripción                                                   |
+|--------------------------|----------------------------------------------------------------|
+| `GET /api/events`        | Lista de eventos. Acepta filtros combinables (ver abajo).       |
+| `GET /api/events/[id]`   | Detalle de un evento. 404 si no existe.                         |
+| `GET /api/categories`    | Lista de categorías disponibles.                                |
+| `GET /api/communes`      | Lista de comunas disponibles (derivadas de los venues).         |
+
+Filtros de `GET /api/events` (todos opcionales, se combinan con AND):
+
+- `search` — texto libre (busca en título, descripción, lugar y comuna)
+- `category` — id de categoría (ver `GET /api/categories`)
+- `commune` — nombre de comuna (ver `GET /api/communes`)
+- `isFree` — `true` o `false`
+- `dateFrom`, `dateTo` — fechas ISO (`YYYY-MM-DD`)
+
+Ejemplos (pégalos en el navegador con el servidor corriendo):
+
+```
+http://localhost:3000/api/events
+http://localhost:3000/api/events?search=teatro
+http://localhost:3000/api/events?category=cat-ferias&commune=Recoleta&isFree=true
+http://localhost:3000/api/events/event-001
+http://localhost:3000/api/categories
+http://localhost:3000/api/communes
+```
+
+Un query param inválido (ej. `isFree=si` o una fecha mal formada) responde
+`400` con el detalle del error; un id inexistente en `/api/events/[id]`
+responde `404`.
 
 ## Comandos disponibles
 
@@ -112,10 +149,10 @@ scripts/
 
 - ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
 - ✅ **Etapa 2** — Estructura de datos mock: modelo conceptual (Event, Venue, Source, Category) tipado en TypeScript y validado con Zod; 24 eventos ficticios en 12 comunas de Santiago; abstracción `EventRepository`/`MockEventRepository` para no acoplar el resto de la app a los datos mock; script `check:data` que valida todo y prueba filtros combinados.
+- ✅ **Etapa 3** — API interna: `GET /api/events` (con filtros combinables), `GET /api/events/[id]`, `GET /api/categories`, `GET /api/communes`. Valida los query params con Zod (400 si son inválidos) y responde 404 si el evento no existe.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- API interna `/api/events`, `/api/categories`, `/api/communes` (Etapa 3)
 - Interfaz principal: header, hero, buscador, listado (Etapa 4)
 - Búsqueda y filtros combinables en la UI (Etapa 5)
 - Página de detalle de evento (Etapa 6)
