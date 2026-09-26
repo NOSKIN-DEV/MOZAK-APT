@@ -196,10 +196,16 @@ incorrecto al cargar la página.
 
 ## Documentación de la evaluación
 
-Además de este README, el proyecto cuenta con dos documentos vivos (Claude Docs) que se mantienen actualizados clase a clase:
+Además de este README, el proyecto cuenta con un documento maestro vivo (Claude Docs) que se mantiene actualizado clase a clase: **Documentación del Proyecto — MOZAK (APT)**, con las pestañas:
 
-- **Sprint Backlog — MOZAK (APT)**: planificación Scrum (Product Backlog y Sprint Backlog), correlacionada con el plan de pruebas oficial del curso (32 casos MTC).
-- **Documentación Técnica — MOZAK (APT)**: Plan de Pruebas (estrategia y metodología de testing), Especificaciones Técnicas (requisitos funcionales/no funcionales, stack, historias de usuario), Modelo de Datos (diagrama entidad-relación, modelo lógico y físico PostgreSQL+PostGIS) y Arquitectura del Sistema (diagrama de componentes, diagrama de casos de uso, diagrama de proceso BPM y plan de dockerización).
+- **Resumen** — índice del documento.
+- **Planificación (Scrum)** — Product Backlog y Sprint Backlog, correlacionados con el plan de pruebas oficial del curso (32 casos MTC).
+- **Plan de Pruebas** — estrategia, tipos de prueba, metodología y herramientas de testing.
+- **Especificaciones Técnicas** — requisitos funcionales/no funcionales, stack tecnológico, historias de usuario.
+- **Modelo de Datos** — diagrama entidad-relación, modelo lógico y modelo físico (PostgreSQL + PostGIS).
+- **Arquitectura del Sistema** — diagrama de componentes, diagrama de casos de uso (UML), diagrama de proceso (BPM) y plan de dockerización.
+
+(El antiguo documento separado "Sprint Backlog — MOZAK (APT)" quedó reemplazado por la pestaña "Planificación (Scrum)" de este documento único.)
 
 ## Próximas funcionalidades (no incluidas todavía)
 
