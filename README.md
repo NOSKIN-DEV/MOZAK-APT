@@ -79,12 +79,13 @@ datos todavía.
 src/
   app/
     api/             API interna (Etapa 3): events, events/[id], categories, communes
-    ...               Rutas y páginas (Next.js App Router)
-  components/   Componentes de interfaz reutilizables
+    page.tsx           Página principal (Etapa 4): header, hero, filtros y listado
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid (Etapa 4)
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository
     api/               Serialización de eventos y parseo de query params para la API
+    format.ts          Formato de precio (CLP) y fechas en español
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
 public/         Archivos estáticos
@@ -150,11 +151,11 @@ responde `404`.
 - ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
 - ✅ **Etapa 2** — Estructura de datos mock: modelo conceptual (Event, Venue, Source, Category) tipado en TypeScript y validado con Zod; 24 eventos ficticios en 12 comunas de Santiago; abstracción `EventRepository`/`MockEventRepository` para no acoplar el resto de la app a los datos mock; script `check:data` que valida todo y prueba filtros combinados.
 - ✅ **Etapa 3** — API interna: `GET /api/events` (con filtros combinables), `GET /api/events/[id]`, `GET /api/categories`, `GET /api/communes`. Valida los query params con Zod (400 si son inválidos) y responde 404 si el evento no existe.
+- ✅ **Etapa 4** — Interfaz principal: header con navegación y buscador, hero con buscador principal, barra de filtros (categoría, comuna, fecha, gratis/pagado) y listado de tarjetas de eventos. La página consume `/api/events`, `/api/categories` y `/api/communes` (no importa los datos mock directamente). Los controles de búsqueda y filtros ya mantienen su propio estado, pero todavía no filtran el listado — eso se conecta en la Etapa 5.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Interfaz principal: header, hero, buscador, listado (Etapa 4)
-- Búsqueda y filtros combinables en la UI (Etapa 5)
+- Búsqueda y filtros combinables conectados al listado (Etapa 5)
 - Página de detalle de evento (Etapa 6)
 - Ajustes responsive finos (Etapa 7)
 - Pruebas unitarias/integración (Etapa 8)
