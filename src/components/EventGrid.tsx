@@ -34,7 +34,7 @@ export function EventGrid({ events, isLoading, error, hasActiveFiltersOrSearch }
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-4 pb-16 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-4 pb-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}

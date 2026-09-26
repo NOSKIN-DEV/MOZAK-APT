@@ -21,6 +21,8 @@
 html,
 body {
   height: 100%;
+  /* Evita scroll horizontal accidental en pantallas angostas (móvil). */
+  overflow-x: hidden;
 }
 
 body {

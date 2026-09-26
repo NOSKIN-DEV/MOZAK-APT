@@ -31,7 +31,7 @@ const priceOptions = [
 ] as const;
 
 const selectClasses =
-  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100";
+  "w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100";
 
 export function FiltersBar({ categories, communes, filters, onChange, onClear }: FiltersBarProps) {
   const hasActiveFilters =
@@ -39,7 +39,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-end">
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full flex-col gap-1 sm:w-auto">
         <label htmlFor="filter-category" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Categoría
         </label>
@@ -58,7 +58,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
         </select>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full flex-col gap-1 sm:w-auto">
         <label htmlFor="filter-commune" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Comuna
         </label>
@@ -77,7 +77,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
         </select>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full flex-col gap-1 sm:w-auto">
         <label htmlFor="filter-date" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Fecha
         </label>
@@ -90,7 +90,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full flex-col gap-1 sm:w-auto">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Precio</span>
         <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
           {priceOptions.map((option) => (
@@ -100,8 +100,8 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
               onClick={() => onChange({ ...filters, priceFilter: option.value })}
               className={
                 filters.priceFilter === option.value
-                  ? "bg-green-600 px-3 py-2 text-sm font-medium text-white"
-                  : "bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                  ? "flex-1 bg-green-600 px-3 py-2 text-sm font-medium text-white sm:flex-none"
+                  : "flex-1 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:flex-none dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
               }
             >
               {option.label}
@@ -114,7 +114,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
         <button
           type="button"
           onClick={onClear}
-          className="text-sm font-medium text-green-700 underline underline-offset-2 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 sm:ml-2"
+          className="text-left text-sm font-medium text-green-700 underline underline-offset-2 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 sm:ml-2 sm:text-center"
         >
           Limpiar filtros
         </button>

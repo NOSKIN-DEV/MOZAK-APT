@@ -140,6 +140,22 @@ oficial" que abre `sourceUrl` en una pestaña nueva. Si el id no existe,
 muestra un mensaje claro de "Evento no encontrado" con un botón para
 volver al listado.
 
+## Responsive
+
+La interfaz está construida mobile-first con los breakpoints estándar de
+Tailwind. Para revisarla, abre las herramientas de desarrollador del
+navegador (F12), activa el modo de dispositivo (ícono de móvil/tablet, o
+Ctrl+Shift+M en Chrome/Edge) y prueba estos anchos:
+
+| Ancho aproximado | Dispositivo   | Qué revisar                                                        |
+|-------------------|----------------|---------------------------------------------------------------------|
+| 375px              | Móvil          | Filtros apilados a ancho completo, sin scroll horizontal            |
+| 768px              | Tablet         | Listado en 2 columnas, filtros en una fila                          |
+| 1024px             | Notebook       | Listado en 3 columnas, header en una sola fila                      |
+| 1440px+            | Escritorio     | Listado en 4 columnas                                                |
+
+No debería aparecer una barra de scroll horizontal en ningún ancho.
+
 ## Modo oscuro
 
 El botón 🌙/☀️ en el header alterna entre modo claro y oscuro. La
@@ -176,10 +192,10 @@ incorrecto al cargar la página.
 - ✅ **Etapa 4** — Interfaz principal: header con navegación y buscador, hero con buscador principal, barra de filtros (categoría, comuna, fecha, gratis/pagado) y listado de tarjetas de eventos. La página consume `/api/events`, `/api/categories` y `/api/communes` (no importa los datos mock directamente).
 - ✅ **Etapa 5** — Búsqueda y filtros: la búsqueda (con debounce de 300ms) y los filtros (categoría, comuna, fecha, gratis/pagado) ya se combinan con AND contra `/api/events`. Contador de resultados, mensaje claro de "sin resultados" y botón "Limpiar filtros" funcionando. Además, se agregó **modo oscuro** (toggle en el header, se recuerda en `localStorage`, respeta la preferencia del sistema si el usuario no eligió antes) para no tener que reintegrarlo más adelante en cada componente.
 - ✅ **Etapa 6** — Página de detalle de evento (`/eventos/[id]`): imagen, título, descripción, categoría, fecha, horario, lugar, dirección, comuna, precio, mapa de ubicación (OpenStreetMap embebido, sin API key), fuente original y botón "Ver sitio oficial". Estados de carga, error y "evento no encontrado". Botón para volver al listado. También se puede volver al listado con una búsqueda aplicada desde el buscador del header.
+- ✅ **Etapa 7** — Ajustes responsive: los filtros ahora ocupan todo el ancho disponible en móvil (antes se veían angostos e irregulares) y se ajustan a su contenido en pantallas más anchas; el listado pasa de 1 columna (móvil) a 2 (tablet) a 3 (notebook) a 4 (escritorio grande); los botones de la página de detalle son de ancho completo en móvil para un mejor "tap target"; y se agregó una regla global (`overflow-x: hidden`) como resguardo contra scroll horizontal accidental. Ver la sección "Responsive" más abajo para cómo probarlo.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Ajustes responsive finos (Etapa 7)
 - Pruebas unitarias/integración (Etapa 8)
 - Docker + docker-compose (Etapa 9)
 - Documentación técnica ampliada (Etapa 10)
