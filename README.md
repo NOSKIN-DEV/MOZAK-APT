@@ -80,7 +80,7 @@ src/
   app/
     api/             API interna (Etapa 3): events, events/[id], categories, communes
     page.tsx           Página principal (Etapa 4): header, hero, filtros y listado
-  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid (Etapa 4)
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, ThemeToggle
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository
@@ -127,6 +127,15 @@ Un query param inválido (ej. `isFree=si` o una fecha mal formada) responde
 `400` con el detalle del error; un id inexistente en `/api/events/[id]`
 responde `404`.
 
+## Modo oscuro
+
+El botón 🌙/☀️ en el header alterna entre modo claro y oscuro. La
+preferencia se guarda en `localStorage` (clave `apt-theme`); si el
+usuario nunca la cambió, se usa `prefers-color-scheme` del sistema
+operativo. Un script inline en `layout.tsx` aplica la clase `dark` en
+`<html>` antes de la primera pintura, para evitar el parpadeo del tema
+incorrecto al cargar la página.
+
 ## Comandos disponibles
 
 | Comando            | Descripción                                    |
@@ -151,11 +160,11 @@ responde `404`.
 - ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
 - ✅ **Etapa 2** — Estructura de datos mock: modelo conceptual (Event, Venue, Source, Category) tipado en TypeScript y validado con Zod; 24 eventos ficticios en 12 comunas de Santiago; abstracción `EventRepository`/`MockEventRepository` para no acoplar el resto de la app a los datos mock; script `check:data` que valida todo y prueba filtros combinados.
 - ✅ **Etapa 3** — API interna: `GET /api/events` (con filtros combinables), `GET /api/events/[id]`, `GET /api/categories`, `GET /api/communes`. Valida los query params con Zod (400 si son inválidos) y responde 404 si el evento no existe.
-- ✅ **Etapa 4** — Interfaz principal: header con navegación y buscador, hero con buscador principal, barra de filtros (categoría, comuna, fecha, gratis/pagado) y listado de tarjetas de eventos. La página consume `/api/events`, `/api/categories` y `/api/communes` (no importa los datos mock directamente). Los controles de búsqueda y filtros ya mantienen su propio estado, pero todavía no filtran el listado — eso se conecta en la Etapa 5.
+- ✅ **Etapa 4** — Interfaz principal: header con navegación y buscador, hero con buscador principal, barra de filtros (categoría, comuna, fecha, gratis/pagado) y listado de tarjetas de eventos. La página consume `/api/events`, `/api/categories` y `/api/communes` (no importa los datos mock directamente).
+- ✅ **Etapa 5** — Búsqueda y filtros: la búsqueda (con debounce de 300ms) y los filtros (categoría, comuna, fecha, gratis/pagado) ya se combinan con AND contra `/api/events`. Contador de resultados, mensaje claro de "sin resultados" y botón "Limpiar filtros" funcionando. Además, se agregó **modo oscuro** (toggle en el header, se recuerda en `localStorage`, respeta la preferencia del sistema si el usuario no eligió antes) para no tener que reintegrarlo más adelante en cada componente.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Búsqueda y filtros combinables conectados al listado (Etapa 5)
 - Página de detalle de evento (Etapa 6)
 - Ajustes responsive finos (Etapa 7)
 - Pruebas unitarias/integración (Etapa 8)

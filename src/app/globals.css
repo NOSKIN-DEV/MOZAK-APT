@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
+/**
+ * Modo oscuro por clase: se activa agregando/quitando la clase "dark"
+ * en <html> (ver ThemeToggle.tsx y el script inline en layout.tsx).
+ * Con esto usamos "dark:" en Tailwind sin depender solo de las
+ * preferencias del sistema operativo.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --color-brand: #16a34a;
   --color-brand-dark: #15803d;
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
 }
 
 html,
@@ -13,4 +26,9 @@ body {
 body {
   color: #111827;
   background-color: #f9fafb;
+}
+
+.dark body {
+  color: #f3f4f6;
+  background-color: #0f172a;
 }

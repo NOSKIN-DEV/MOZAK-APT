@@ -10,9 +10,9 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Link
       href={`/eventos/${event.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
     >
-      <div className="aspect-video w-full overflow-hidden bg-gray-100">
+      <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         {event.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- imágenes externas (picsum), sin optimización necesaria en el prototipo
           <img
@@ -27,15 +27,17 @@ export function EventCard({ event }: EventCardProps) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
-        <span className="w-fit rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+        <span className="w-fit rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300">
           {event.category.name}
         </span>
-        <h3 className="line-clamp-2 font-semibold text-gray-900">{event.title}</h3>
-        <p className="text-sm text-gray-600">{formatEventDate(event.startDate, event.endDate)}</p>
-        <p className="text-sm text-gray-600">
+        <h3 className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-50">{event.title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {formatEventDate(event.startDate, event.endDate)}
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {event.venue.name} · {event.venue.commune}
         </p>
-        <p className="mt-auto pt-2 text-sm font-semibold text-gray-900">
+        <p className="mt-auto pt-2 text-sm font-semibold text-gray-900 dark:text-gray-50">
           {formatPrice(event.price, event.isFree)}
         </p>
       </div>

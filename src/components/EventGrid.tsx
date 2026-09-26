@@ -5,22 +5,31 @@ interface EventGridProps {
   events: ApiEvent[];
   isLoading: boolean;
   error: string | null;
+  hasActiveFiltersOrSearch: boolean;
 }
 
-export function EventGrid({ events, isLoading, error }: EventGridProps) {
+export function EventGrid({ events, isLoading, error, hasActiveFiltersOrSearch }: EventGridProps) {
   if (isLoading) {
-    return <p className="px-4 py-16 text-center text-gray-500">Cargando eventos…</p>;
+    return <p className="px-4 py-16 text-center text-gray-500 dark:text-gray-400">Cargando eventos…</p>;
   }
 
   if (error) {
-    return <p className="px-4 py-16 text-center text-red-600">{error}</p>;
+    return <p className="px-4 py-16 text-center text-red-600 dark:text-red-400">{error}</p>;
   }
 
   if (events.length === 0) {
     return (
-      <p className="px-4 py-16 text-center text-gray-500">
-        No se encontraron eventos con los filtros seleccionados.
-      </p>
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <p className="text-4xl" aria-hidden>
+          🔎
+        </p>
+        <p className="mt-3 font-medium text-gray-900 dark:text-gray-100">No se encontraron eventos.</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {hasActiveFiltersOrSearch
+            ? "Prueba con otra búsqueda o quita algunos filtros."
+            : "Todavía no hay eventos cargados."}
+        </p>
+      </div>
     );
   }
 

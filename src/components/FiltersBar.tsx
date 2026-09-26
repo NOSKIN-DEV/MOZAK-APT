@@ -30,11 +30,9 @@ const priceOptions = [
   { value: "paid", label: "Pagado" },
 ] as const;
 
-/**
- * Los controles ya actualizan el estado (filters) del componente padre,
- * pero el listado de eventos todavía no se filtra según estos valores:
- * eso se conecta en la Etapa 5 (búsqueda y filtros combinables).
- */
+const selectClasses =
+  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100";
+
 export function FiltersBar({ categories, communes, filters, onChange, onClear }: FiltersBarProps) {
   const hasActiveFilters =
     filters.category !== "" || filters.commune !== "" || filters.date !== "" || filters.priceFilter !== "all";
@@ -42,14 +40,14 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-end">
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-category" className="text-xs font-medium text-gray-600">
+        <label htmlFor="filter-category" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Categoría
         </label>
         <select
           id="filter-category"
           value={filters.category}
           onChange={(e) => onChange({ ...filters, category: e.target.value })}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+          className={selectClasses}
         >
           <option value="">Todas</option>
           {categories.map((category) => (
@@ -61,14 +59,14 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-commune" className="text-xs font-medium text-gray-600">
+        <label htmlFor="filter-commune" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Comuna
         </label>
         <select
           id="filter-commune"
           value={filters.commune}
           onChange={(e) => onChange({ ...filters, commune: e.target.value })}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+          className={selectClasses}
         >
           <option value="">Todas</option>
           {communes.map((commune) => (
@@ -80,7 +78,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-date" className="text-xs font-medium text-gray-600">
+        <label htmlFor="filter-date" className="text-xs font-medium text-gray-600 dark:text-gray-400">
           Fecha
         </label>
         <input
@@ -88,13 +86,13 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
           type="date"
           value={filters.date}
           onChange={(e) => onChange({ ...filters, date: e.target.value })}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+          className={selectClasses}
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-gray-600">Precio</span>
-        <div className="flex overflow-hidden rounded-lg border border-gray-300">
+        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Precio</span>
+        <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
           {priceOptions.map((option) => (
             <button
               key={option.value}
@@ -103,7 +101,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
               className={
                 filters.priceFilter === option.value
                   ? "bg-green-600 px-3 py-2 text-sm font-medium text-white"
-                  : "bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  : "bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
               }
             >
               {option.label}
@@ -116,7 +114,7 @@ export function FiltersBar({ categories, communes, filters, onChange, onClear }:
         <button
           type="button"
           onClick={onClear}
-          className="text-sm font-medium text-green-700 underline underline-offset-2 hover:text-green-800 sm:ml-2"
+          className="text-sm font-medium text-green-700 underline underline-offset-2 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 sm:ml-2"
         >
           Limpiar filtros
         </button>
