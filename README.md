@@ -178,7 +178,27 @@ incorrecto al cargar la página.
 
 ## Pruebas
 
-*(Se incorporarán en la Etapa 8: búsqueda, filtros y API de eventos.)*
+Las pruebas unitarias y de integración (Vitest) cubren la Épica APT-8 del
+Sprint 2, trazada contra el plan de pruebas oficial del curso (32 casos MTC):
+
+```bash
+npm run test       # corre toda la suite una vez
+npm run test:watch # modo watch, útil mientras se desarrolla
+```
+
+| Archivo | Qué cubre |
+|---|---|
+| `src/lib/format.test.ts` | `formatPrice` (gratis/pagado, formato CLP) y `formatEventDate` (fecha única vs. rango) |
+| `src/lib/api/parse-event-query.test.ts` | Parseo y validación de los query params de `GET /api/events` |
+| `src/lib/repositories/mock-event-repository.test.ts` | `MockEventRepository`: búsqueda por texto, filtro por categoría, por comuna, por fecha (incluye eventos multi-día), gratis/pagado, combinación de filtros con AND, `findById` |
+| `src/app/api/events/route.test.ts` | `GET /api/events`: 200 con JSON válido, filtros combinados, 400 ante parámetros inválidos |
+| `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento, 404 si no existe |
+| `src/app/api/categories/route.test.ts` | `GET /api/categories`: 200 con las 9 categorías |
+| `src/app/api/communes/route.test.ts` | `GET /api/communes`: 200 con las 12 comunas, sin duplicados y ordenadas |
+
+Todos los casos usan los datos mock reales de `src/data` (no fixtures
+inventados), así que también detectan si un cambio futuro en esos datos
+rompe un escenario ya cubierto por el plan de pruebas oficial.
 
 ## Docker
 
@@ -193,6 +213,7 @@ incorrecto al cargar la página.
 - ✅ **Etapa 5** — Búsqueda y filtros: la búsqueda (con debounce de 300ms) y los filtros (categoría, comuna, fecha, gratis/pagado) ya se combinan con AND contra `/api/events`. Contador de resultados, mensaje claro de "sin resultados" y botón "Limpiar filtros" funcionando. Además, se agregó **modo oscuro** (toggle en el header, se recuerda en `localStorage`, respeta la preferencia del sistema si el usuario no eligió antes) para no tener que reintegrarlo más adelante en cada componente.
 - ✅ **Etapa 6** — Página de detalle de evento (`/eventos/[id]`): imagen, título, descripción, categoría, fecha, horario, lugar, dirección, comuna, precio, mapa de ubicación (OpenStreetMap embebido, sin API key), fuente original y botón "Ver sitio oficial". Estados de carga, error y "evento no encontrado". Botón para volver al listado. También se puede volver al listado con una búsqueda aplicada desde el buscador del header.
 - ✅ **Etapa 7** — Ajustes responsive: los filtros ahora ocupan todo el ancho disponible en móvil (antes se veían angostos e irregulares) y se ajustan a su contenido en pantallas más anchas; el listado pasa de 1 columna (móvil) a 2 (tablet) a 3 (notebook) a 4 (escritorio grande); los botones de la página de detalle son de ancho completo en móvil para un mejor "tap target"; y se agregó una regla global (`overflow-x: hidden`) como resguardo contra scroll horizontal accidental. Ver la sección "Responsive" más abajo para cómo probarlo.
+- 🟡 **Etapa 8** — Pruebas automatizadas (Épica APT-8, Sprint 2): suite de Vitest escrita (7 archivos — ver sección «Pruebas»), con pruebas unitarias del repositorio/utilidades y pruebas de integración de la API interna, usando los datos mock reales. Pendiente de ejecutar `npm install && npm run test` en un entorno con acceso a internet para la confirmación final — no se pudo correr aquí por una restricción de red puntual del entorno de desarrollo usado para escribirlas.
 
 ## Documentación de la evaluación
 
@@ -209,9 +230,16 @@ Además de este README, el proyecto cuenta con un documento maestro vivo (Claude
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Pruebas unitarias/integración (Etapa 8)
+- Confirmar en un entorno con npm que `npm run test` pasa en verde (ver
+  Etapa 8 arriba) y marcarla como completada.
 - Docker + docker-compose (Etapa 9)
 - Documentación técnica ampliada (Etapa 10)
+- **Imagen de fondo y video en el detalle de evento:** al seleccionar un
+  evento, mostrar de fondo una imagen tipo afiche/stand publicitario del
+  evento, y un video sobre esa imagen. Pendiente de definir en qué etapa
+  se implementa; probablemente requiera agregar campos nuevos al modelo
+  `Event` (p. ej. `posterImageUrl`, `videoUrl`) además del `imageUrl`
+  que ya existe.
 - Reemplazo de datos mock por PostgreSQL + PostGIS y fuentes externas
   reales, pagos, cuentas de usuario avanzadas, notificaciones, panel
   administrativo, versión Android vía Capacitor.
