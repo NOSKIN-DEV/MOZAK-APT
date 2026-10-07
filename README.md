@@ -235,15 +235,10 @@ Sistema») se incorporará cuando se implemente la persistencia real, junto
 con un `PostgresEventRepository`.
 
 > **Nota:** construir la imagen requiere acceso a internet (para traer la
-> imagen base `node:22-slim` y para `npm install` dentro del build). No se
-> pudo ejecutar `docker compose up --build` en el entorno donde se escribió
-> este Dockerfile por la misma restricción de red puntual que afectó a
-> `npm install` en la Etapa 8 (ver sección «Pruebas» más abajo); el
-> `Dockerfile` y el `docker-compose.yml` sí se validaron localmente con
-> `docker compose config` (sintaxis correcta) y con `docker build`, que
-> avanzó correctamente hasta el paso que requiere red externa. Falta
-> confirmar `docker compose up --build` en un entorno con Docker Desktop y
-> acceso a internet normal.
+> imagen base `node:22-slim` y para `npm install` dentro del build). La
+> primera construcción demora unos 2 minutos; las siguientes reutilizan
+> las capas en caché. Verificado con `docker compose up --build` en
+> Docker Desktop sobre Windows.
 
 ## Estado del prototipo
 
@@ -255,7 +250,7 @@ con un `PostgresEventRepository`.
 - ✅ **Etapa 6** — Página de detalle de evento (`/eventos/[id]`): imagen, título, descripción, categoría, fecha, horario, lugar, dirección, comuna, precio, mapa de ubicación (OpenStreetMap embebido, sin API key), fuente original y botón "Ver sitio oficial". Estados de carga, error y "evento no encontrado". Botón para volver al listado. También se puede volver al listado con una búsqueda aplicada desde el buscador del header.
 - ✅ **Etapa 7** — Ajustes responsive: los filtros ahora ocupan todo el ancho disponible en móvil (antes se veían angostos e irregulares) y se ajustan a su contenido en pantallas más anchas; el listado pasa de 1 columna (móvil) a 2 (tablet) a 3 (notebook) a 4 (escritorio grande); los botones de la página de detalle son de ancho completo en móvil para un mejor "tap target"; y se agregó una regla global (`overflow-x: hidden`) como resguardo contra scroll horizontal accidental. Ver la sección "Responsive" más abajo para cómo probarlo.
 - ✅ **Etapa 8** — Pruebas automatizadas (Épica APT-8, Sprint 2): suite de Vitest (7 archivos, 41 pruebas — ver sección «Pruebas»), con pruebas unitarias del repositorio/utilidades y pruebas de integración de la API interna, usando los datos mock reales. **Verificado**: `npm run test` ejecutado en un entorno con npm — 7/7 archivos y 41/41 pruebas en verde.
-- 🟡 **Etapa 9** — Docker (Sprint 3): `Dockerfile` multi-stage (`deps` → `build` → `runner`, imagen final liviana con el build standalone de Next.js) y `docker-compose.yml` (servicio `app`, puerto 3000, healthcheck). Ver sección «Docker» más abajo. Pendiente de ejecutar `docker compose up --build` en un entorno con Docker y acceso a internet para la confirmación final — no se pudo correr aquí por la misma restricción de red puntual que afectó la Etapa 8 (esta vez bloqueando Docker Hub además de npm).
+- ✅ **Etapa 9** — Docker (Sprint 3): `Dockerfile` multi-stage (`deps` → `build` → `runner`, imagen final liviana con el build standalone de Next.js) y `docker-compose.yml` (servicio `app`, puerto 3000, healthcheck). Ver sección «Docker» más abajo. **Verificado**: `docker compose up --build` ejecutado en Docker Desktop (Windows); la imagen se construyó (~107 s la primera vez) y Next.js 16.0.1 quedó "Ready" en el puerto 3000.
 
 ## Documentación de la evaluación
 
