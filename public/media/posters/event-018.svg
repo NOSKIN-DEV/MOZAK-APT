@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Muestra de cine europeo">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e293b"/><stop offset="1" stop-color="#475569"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="363" cy="135" r="226" fill="#fff" fill-opacity="0.05"/><circle cx="577" cy="565" r="151" fill="#fff" fill-opacity="0.08"/><circle cx="428" cy="30" r="88" fill="#fff" fill-opacity="0.05"/><circle cx="914" cy="617" r="144" fill="#fff" fill-opacity="0.08"/><circle cx="791" cy="250" r="235" fill="#fff" fill-opacity="0.08"/><circle cx="301" cy="42" r="80" fill="#fff" fill-opacity="0.05"/><circle cx="1222" cy="344" r="83" fill="#fff" fill-opacity="0.12"/>
+<rect x="80" y="96" width="100" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">CINE</text>
+<text x="80" y="330" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Muestra de cine europeo</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

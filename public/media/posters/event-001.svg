@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Exposición de arte contemporáneo">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#db2777"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="487" cy="673" r="151" fill="#fff" fill-opacity="0.12"/><circle cx="784" cy="40" r="199" fill="#fff" fill-opacity="0.08"/><circle cx="489" cy="374" r="157" fill="#fff" fill-opacity="0.05"/><circle cx="500" cy="306" r="167" fill="#fff" fill-opacity="0.08"/><circle cx="482" cy="423" r="165" fill="#fff" fill-opacity="0.12"/><circle cx="83" cy="521" r="133" fill="#fff" fill-opacity="0.05"/><circle cx="597" cy="125" r="244" fill="#fff" fill-opacity="0.08"/>
+<rect x="80" y="96" width="220" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">EXPOSICIONES</text>
+<text x="80" y="288" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Exposición de arte</tspan><tspan x="80" dy="84">contemporáneo</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

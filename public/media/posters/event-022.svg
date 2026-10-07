@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Taller de fotografía con celular">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2410c"/><stop offset="1" stop-color="#be185d"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="243" cy="579" r="115" fill="#fff" fill-opacity="0.12"/><circle cx="970" cy="270" r="221" fill="#fff" fill-opacity="0.05"/><circle cx="629" cy="356" r="224" fill="#fff" fill-opacity="0.12"/><circle cx="1132" cy="556" r="225" fill="#fff" fill-opacity="0.12"/><circle cx="1122" cy="559" r="209" fill="#fff" fill-opacity="0.05"/><circle cx="913" cy="124" r="225" fill="#fff" fill-opacity="0.12"/><circle cx="21" cy="68" r="109" fill="#fff" fill-opacity="0.05"/>
+<rect x="80" y="96" width="160" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">TALLERES</text>
+<text x="80" y="288" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Taller de fotografía con</tspan><tspan x="80" dy="84">celular</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

@@ -38,6 +38,10 @@ export interface ApiEvent {
   price: number;
   isFree: boolean;
   imageUrl: string | null;
+  /** Afiche de fondo del detalle (ruta local bajo /public o URL http(s)). */
+  posterImageUrl: string | null;
+  /** Video promocional que se reproduce sobre el afiche. */
+  videoUrl: string | null;
   sourceUrl: string;
 }
 
@@ -72,6 +76,8 @@ export function toApiEvent(event: EventWithRelations): ApiEvent {
     price: event.price,
     isFree: event.isFree,
     imageUrl: event.imageUrl,
+    posterImageUrl: event.posterImageUrl,
+    videoUrl: event.videoUrl,
     sourceUrl: event.sourceUrl,
   };
 }

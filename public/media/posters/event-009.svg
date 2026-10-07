@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Feria del libro usado">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15803d"/><stop offset="1" stop-color="#ca8a04"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="419" cy="543" r="167" fill="#fff" fill-opacity="0.12"/><circle cx="966" cy="108" r="168" fill="#fff" fill-opacity="0.08"/><circle cx="211" cy="359" r="140" fill="#fff" fill-opacity="0.12"/><circle cx="214" cy="125" r="136" fill="#fff" fill-opacity="0.12"/><circle cx="881" cy="189" r="229" fill="#fff" fill-opacity="0.08"/><circle cx="1260" cy="677" r="180" fill="#fff" fill-opacity="0.05"/><circle cx="1163" cy="442" r="95" fill="#fff" fill-opacity="0.12"/>
+<rect x="80" y="96" width="130" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">FERIAS</text>
+<text x="80" y="330" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Feria del libro usado</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

@@ -30,6 +30,8 @@ function toEventWithRelations(event: Event): EventWithRelations {
     price: event.price,
     isFree: event.isFree,
     imageUrl: event.imageUrl,
+    posterImageUrl: event.posterImageUrl,
+    videoUrl: event.videoUrl,
     sourceUrl: event.sourceUrl,
     category,
     venue,

@@ -29,6 +29,17 @@ export interface Event {
   price: number;
   isFree: boolean;
   imageUrl: string | null;
+  /**
+   * Afiche / imagen publicitaria del evento. Se muestra de fondo en la
+   * página de detalle (Etapa 10). Ruta local bajo /public (ej:
+   * "/media/posters/event-001.svg") o URL absoluta http(s). null si no hay.
+   */
+  posterImageUrl: string | null;
+  /**
+   * Video promocional del evento. Se reproduce sobre el afiche en la
+   * página de detalle (Etapa 10). Misma convención de ruta que posterImageUrl.
+   */
+  videoUrl: string | null;
   /** URL a la publicación original del evento */
   sourceUrl: string;
   /** Referencia a Source.id */

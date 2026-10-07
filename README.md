@@ -83,7 +83,7 @@ src/
     api/             API interna (Etapa 3): events, events/[id], categories, communes
     page.tsx           Página principal (Etapa 4/5): header, hero, filtros y listado
     eventos/[id]/      Página de detalle de evento (Etapa 6)
-  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, ThemeToggle
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository
@@ -91,7 +91,9 @@ src/
     format.ts          Formato de precio (CLP) y fechas en español
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
-public/         Archivos estáticos
+public/
+  media/           Afiches (posters/) y videos (videos/) de los eventos (Etapa 10)
+docs/            Documentación técnica ampliada (Etapa 10)
 scripts/
   check-mock-data.ts   Valida los datos mock y prueba el repositorio (npm run check:data)
 ```
@@ -132,13 +134,31 @@ responde `404`.
 
 ## Página de detalle de evento
 
-`GET /eventos/[id]` (ej. `http://localhost:3000/eventos/event-001`) muestra
-el detalle completo de un evento: imagen, categoría, título, descripción,
-fecha, horario, lugar, dirección, comuna, precio, un mapa de ubicación
+`GET /eventos/[id]` (ej. `http://localhost:3000/eventos/event-002`) muestra
+el detalle completo de un evento: categoría, título, descripción, fecha,
+horario, lugar, dirección, comuna, precio, un mapa de ubicación
 (OpenStreetMap embebido, no requiere API key) y un botón "Ver sitio
 oficial" que abre `sourceUrl` en una pestaña nueva. Si el id no existe,
 muestra un mensaje claro de "Evento no encontrado" con un botón para
 volver al listado.
+
+### Afiche de fondo y video del evento (Etapa 10)
+
+Al seleccionar un evento, **el afiche del evento queda de fondo** (en toda
+la página, desenfocado y atenuado para no restar legibilidad) y, **sobre el
+afiche, se reproduce el video promocional** del evento (con controles; no
+arranca solo). Si el evento no tiene video, se muestra su foto enmarcada
+sobre el afiche; si no tiene afiche, la cabecera se ve como antes.
+
+- Nuevos campos del modelo `Event` (opcionales, `null` si no hay):
+  `posterImageUrl` y `videoUrl`. Aceptan una ruta local bajo `public/`
+  (ej. `/media/posters/event-002.svg`) o una URL `http(s)://`, y también
+  salen en `GET /api/events` y `GET /api/events/[id]`.
+- Los 24 eventos de demostración tienen afiche (`public/media/posters/`) y 9
+  de ellos tienen video (`public/media/videos/`); son material original de
+  demostración, no publicidad real.
+- Cómo agregar afiche y video a un evento: ver
+  [`docs/DOCUMENTACION-TECNICA.md`](docs/DOCUMENTACION-TECNICA.md), sección 4.
 
 ## Responsive
 
@@ -192,9 +212,10 @@ npm run test:watch # modo watch, útil mientras se desarrolla
 | `src/lib/api/parse-event-query.test.ts` | Parseo y validación de los query params de `GET /api/events` |
 | `src/lib/repositories/mock-event-repository.test.ts` | `MockEventRepository`: búsqueda por texto, filtro por categoría, por comuna, por fecha (incluye eventos multi-día), gratis/pagado, combinación de filtros con AND, `findById` |
 | `src/app/api/events/route.test.ts` | `GET /api/events`: 200 con JSON válido, filtros combinados, 400 ante parámetros inválidos |
-| `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento, 404 si no existe |
+| `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento (incluye `posterImageUrl`/`videoUrl`), 404 si no existe |
 | `src/app/api/categories/route.test.ts` | `GET /api/categories`: 200 con las 9 categorías |
 | `src/app/api/communes/route.test.ts` | `GET /api/communes`: 200 con las 12 comunas, sin duplicados y ordenadas |
+| `src/data/media-assets.test.ts` | Afiche y video (Etapa 10): datos mock válidos, cada archivo local referenciado existe en `public/`, y el esquema rechaza rutas peligrosas (`javascript:`, `//host`, sin `/` inicial) |
 
 Todos los casos usan los datos mock reales de `src/data` (no fixtures
 inventados), así que también detectan si un cambio futuro en esos datos
@@ -251,6 +272,7 @@ con un `PostgresEventRepository`.
 - ✅ **Etapa 7** — Ajustes responsive: los filtros ahora ocupan todo el ancho disponible en móvil (antes se veían angostos e irregulares) y se ajustan a su contenido en pantallas más anchas; el listado pasa de 1 columna (móvil) a 2 (tablet) a 3 (notebook) a 4 (escritorio grande); los botones de la página de detalle son de ancho completo en móvil para un mejor "tap target"; y se agregó una regla global (`overflow-x: hidden`) como resguardo contra scroll horizontal accidental. Ver la sección "Responsive" más abajo para cómo probarlo.
 - ✅ **Etapa 8** — Pruebas automatizadas (Épica APT-8, Sprint 2): suite de Vitest (7 archivos, 41 pruebas — ver sección «Pruebas»), con pruebas unitarias del repositorio/utilidades y pruebas de integración de la API interna, usando los datos mock reales. **Verificado**: `npm run test` ejecutado en un entorno con npm — 7/7 archivos y 41/41 pruebas en verde.
 - ✅ **Etapa 9** — Docker (Sprint 3): `Dockerfile` multi-stage (`deps` → `build` → `runner`, imagen final liviana con el build standalone de Next.js) y `docker-compose.yml` (servicio `app`, puerto 3000, healthcheck). Ver sección «Docker» más abajo. **Verificado**: `docker compose up --build` ejecutado en Docker Desktop (Windows); la imagen se construyó (~107 s la primera vez) y Next.js 16.0.1 quedó "Ready" en el puerto 3000.
+- 🟡 **Etapa 10** — Afiche y video del evento + documentación técnica ampliada (Sprint 3): el detalle de evento muestra el afiche de fondo y el video sobre él (nuevos campos `posterImageUrl`/`videoUrl`, validación, API, 24 afiches y 3 videos de demostración); nuevo `docs/DOCUMENTACION-TECNICA.md` (arquitectura, modelo, API, guía multimedia, solución de problemas). Se agregaron 18 pruebas (ahora 8 archivos y 59 pruebas esperadas). Pendiente de ejecutar `npm install && npm run test` y probar la página en el navegador para la confirmación final.
 
 ## Documentación de la evaluación
 
@@ -267,13 +289,6 @@ Además de este README, el proyecto cuenta con un documento maestro vivo (Claude
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Documentación técnica ampliada (Etapa 10)
-- **Imagen de fondo y video en el detalle de evento:** al seleccionar un
-  evento, mostrar de fondo una imagen tipo afiche/stand publicitario del
-  evento, y un video sobre esa imagen. Pendiente de definir en qué etapa
-  se implementa; probablemente requiera agregar campos nuevos al modelo
-  `Event` (p. ej. `posterImageUrl`, `videoUrl`) además del `imageUrl`
-  que ya existe.
 - Reemplazo de datos mock por PostgreSQL + PostGIS y fuentes externas
   reales, pagos, cuentas de usuario avanzadas, notificaciones, panel
   administrativo, versión Android vía Capacitor.

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Caminata familiar por el cerro">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="993" cy="82" r="68" fill="#fff" fill-opacity="0.08"/><circle cx="899" cy="448" r="85" fill="#fff" fill-opacity="0.05"/><circle cx="1223" cy="608" r="98" fill="#fff" fill-opacity="0.08"/><circle cx="918" cy="346" r="236" fill="#fff" fill-opacity="0.12"/><circle cx="1081" cy="38" r="80" fill="#fff" fill-opacity="0.08"/><circle cx="1279" cy="321" r="236" fill="#fff" fill-opacity="0.12"/><circle cx="549" cy="425" r="63" fill="#fff" fill-opacity="0.08"/>
+<rect x="80" y="96" width="370" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">ACTIVIDADES FAMILIARES</text>
+<text x="80" y="288" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Caminata familiar por el</tspan><tspan x="80" dy="84">cerro</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

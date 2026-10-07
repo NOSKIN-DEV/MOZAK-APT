@@ -145,6 +145,16 @@ describe("MockEventRepository", () => {
       expect(result?.category.id).toBe("cat-conciertos");
     });
 
+    it("incluye afiche y video (Etapa 10); videoUrl es null si el evento no tiene video", async () => {
+      const withVideo = await repo.findById("event-002");
+      expect(withVideo?.posterImageUrl).toBe("/media/posters/event-002.svg");
+      expect(withVideo?.videoUrl).toBe("/media/videos/promo-a.mp4");
+
+      const withoutVideo = await repo.findById("event-005");
+      expect(withoutVideo?.posterImageUrl).toBe("/media/posters/event-005.svg");
+      expect(withoutVideo?.videoUrl).toBeNull();
+    });
+
     it("retorna null cuando el id no existe", async () => {
       const result = await repo.findById("event-999");
       expect(result).toBeNull();

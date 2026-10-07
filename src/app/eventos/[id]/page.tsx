@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { EventLocationMap } from "@/components/EventLocationMap";
+import { EventMediaHero, EventPosterBackdrop } from "@/components/EventMedia";
 import type { ApiEvent } from "@/lib/api";
 import { formatEventDate, formatPrice } from "@/lib/format";
 
@@ -56,7 +57,8 @@ export default function EventDetailPage() {
   }, [event]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="relative isolate min-h-screen bg-gray-50 dark:bg-gray-950">
+      {status === "found" && event && <EventPosterBackdrop posterImageUrl={event.posterImageUrl} />}
       <Header searchValue={headerSearch} onSearchChange={setHeaderSearch} onSearchSubmit={handleSearchSubmit} />
 
       <div className="mx-auto max-w-4xl px-4 py-6">
@@ -99,16 +101,12 @@ export default function EventDetailPage() {
 
         {status === "found" && event && (
           <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-              {event.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- imagen externa (picsum), sin optimización necesaria en el prototipo
-                <img src={event.imageUrl} alt={event.title} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-6xl" aria-hidden>
-                  🗓️
-                </div>
-              )}
-            </div>
+            <EventMediaHero
+              title={event.title}
+              imageUrl={event.imageUrl}
+              posterImageUrl={event.posterImageUrl}
+              videoUrl={event.videoUrl}
+            />
 
             <div className="flex flex-col gap-6 p-5 sm:p-8">
               <div>

@@ -26,6 +26,16 @@ export const sourceSchema = z.object({
   active: z.boolean(),
 });
 
+/**
+ * Ruta de un recurso multimedia (afiche o video): o bien una ruta local
+ * dentro de /public (empieza con "/", ej: "/media/posters/event-001.svg"),
+ * o bien una URL absoluta http(s). No acepta valores vacíos ni rutas
+ * relativas sin "/" inicial, que se romperían según la página que las use.
+ */
+const mediaUrl = z
+  .string()
+  .regex(/^(\/(?!\/)|https?:\/\/)\S+$/, "Debe ser una ruta local que empiece con '/' o una URL http(s)");
+
 const isoDate = z.iso.date();
 const isoTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Hora inválida, formato esperado HH:mm");
 
@@ -43,6 +53,8 @@ export const eventSchema = z
     price: z.number().min(0),
     isFree: z.boolean(),
     imageUrl: z.url().nullable(),
+    posterImageUrl: mediaUrl.nullable(),
+    videoUrl: mediaUrl.nullable(),
     sourceUrl: z.url(),
     sourceId: z.string().min(1),
     venueId: z.string().min(1),

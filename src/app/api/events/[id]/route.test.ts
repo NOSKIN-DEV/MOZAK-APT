@@ -21,6 +21,21 @@ describe("GET /api/events/[id]", () => {
     expect(body.data.venue.commune).toBe("Providencia");
   });
 
+  // Etapa 10: afiche de fondo y video sobre el afiche
+  it("incluye el afiche y el video del evento cuando los tiene", async () => {
+    const response = await GET(new Request("http://localhost:3000/api/events/event-002"), context("event-002"));
+    const body = await response.json();
+    expect(body.data.posterImageUrl).toBe("/media/posters/event-002.svg");
+    expect(body.data.videoUrl).toBe("/media/videos/promo-a.mp4");
+  });
+
+  it("devuelve videoUrl en null (y el afiche igual) cuando el evento no tiene video", async () => {
+    const response = await GET(new Request("http://localhost:3000/api/events/event-005"), context("event-005"));
+    const body = await response.json();
+    expect(body.data.posterImageUrl).toBe("/media/posters/event-005.svg");
+    expect(body.data.videoUrl).toBeNull();
+  });
+
   it("responde 404 con un mensaje claro cuando el id no existe", async () => {
     const response = await GET(new Request("http://localhost:3000/api/events/event-999"), context("event-999"));
     expect(response.status).toBe(404);

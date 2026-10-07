@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Festival de teatro callejero">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9f1239"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="592" cy="598" r="218" fill="#fff" fill-opacity="0.08"/><circle cx="20" cy="468" r="103" fill="#fff" fill-opacity="0.08"/><circle cx="247" cy="74" r="249" fill="#fff" fill-opacity="0.05"/><circle cx="604" cy="615" r="63" fill="#fff" fill-opacity="0.05"/><circle cx="1045" cy="559" r="242" fill="#fff" fill-opacity="0.12"/><circle cx="1075" cy="673" r="139" fill="#fff" fill-opacity="0.12"/><circle cx="389" cy="693" r="226" fill="#fff" fill-opacity="0.05"/>
+<rect x="80" y="96" width="130" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">TEATRO</text>
+<text x="80" y="288" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Festival de teatro</tspan><tspan x="80" dy="84">callejero</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>

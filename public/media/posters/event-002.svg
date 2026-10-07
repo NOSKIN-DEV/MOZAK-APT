@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-label="Afiche de demostración: Concierto de jazz en el parque">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#g)"/><circle cx="621" cy="719" r="63" fill="#fff" fill-opacity="0.12"/><circle cx="894" cy="407" r="196" fill="#fff" fill-opacity="0.08"/><circle cx="643" cy="339" r="249" fill="#fff" fill-opacity="0.08"/><circle cx="728" cy="25" r="151" fill="#fff" fill-opacity="0.12"/><circle cx="1240" cy="218" r="86" fill="#fff" fill-opacity="0.12"/><circle cx="349" cy="638" r="120" fill="#fff" fill-opacity="0.12"/><circle cx="805" cy="34" r="149" fill="#fff" fill-opacity="0.05"/>
+<rect x="80" y="96" width="190" height="46" rx="23" fill="#fff" fill-opacity="0.2"/>
+<text x="100" y="128" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#fff">CONCIERTOS</text>
+<text x="80" y="288" font-family="Poppins, Arial, sans-serif" font-size="72" font-weight="700" fill="#fff"><tspan x="80" dy="0">Concierto de jazz en el</tspan><tspan x="80" dy="84">parque</tspan></text>
+<text x="80" y="660" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#fff" fill-opacity="0.85">MOZAK · afiche de demostración</text>
+</svg>
