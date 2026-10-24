@@ -82,9 +82,9 @@ function matchesFilters(event: EventWithRelations, filters: EventFilters): boole
 
 /**
  * Repositorio de eventos que lee desde los datos mock locales
- * (src/data). Cumple el contrato EventRepository para que, en una
- * etapa futura, pueda reemplazarse por un PostgresEventRepository sin
- * tocar la API ni el frontend.
+ * (src/data). Cumple el contrato EventRepository, igual que
+ * PostgresEventRepository, así que se puede reemplazar (DATA_SOURCE) sin
+ * tocar la API ni el frontend. Es la fuente por defecto del prototipo.
  */
 export class MockEventRepository implements EventRepository {
   async findAll(filters: EventFilters = {}): Promise<EventWithRelations[]> {
@@ -105,10 +105,3 @@ export class MockEventRepository implements EventRepository {
     return Array.from(communes).sort((a, b) => a.localeCompare(b, "es"));
   }
 }
-
-/**
- * Instancia única del repositorio activo del prototipo.
- * Cuando exista PostgresEventRepository, este archivo (o una fábrica
- * basada en DATA_SOURCE) decidirá cuál instanciar.
- */
-export const eventRepository: EventRepository = new MockEventRepository();

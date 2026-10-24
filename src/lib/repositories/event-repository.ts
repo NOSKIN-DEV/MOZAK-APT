@@ -18,10 +18,12 @@ export interface EventWithRelations extends Omit<Event, "category" | "venueId" |
  * eventos, sin acoplar el resto de la aplicación a la fuente de datos
  * concreta.
  *
- * Implementaciones:
- * - MockEventRepository (este prototipo): lee de src/data/*.
- * - PostgresEventRepository (etapa futura): leerá desde PostgreSQL/PostGIS
+ * Implementaciones (se elige con DATA_SOURCE, ver factory.ts):
+ * - MockEventRepository ("mock", por defecto): lee de src/data/*.
+ * - PostgresEventRepository ("postgres", Etapa 11): lee desde PostgreSQL
  *   vía Prisma, sin que el frontend ni la API deban cambiar.
+ *
+ * Ambas se validan con la misma batería de pruebas (event-repository.contract.ts).
  */
 export interface EventRepository {
   findAll(filters?: EventFilters): Promise<EventWithRelations[]>;

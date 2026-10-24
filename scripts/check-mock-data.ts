@@ -9,7 +9,10 @@
  */
 import { categories, events, sources, venues } from "../src/data";
 import { categorySchema, eventSchema, sourceSchema, venueSchema } from "../src/lib/schemas";
-import { eventRepository } from "../src/lib/repositories";
+import { MockEventRepository } from "../src/lib/repositories";
+
+// Este script revisa específicamente los datos mock, sin importar DATA_SOURCE.
+const eventRepository = new MockEventRepository();
 
 let errors = 0;
 
