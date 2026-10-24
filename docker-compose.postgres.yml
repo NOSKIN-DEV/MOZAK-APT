@@ -1,0 +1,62 @@
+# Modo PostgreSQL (Etapa 11): agrega la base de datos y hace que la app la use.
+#
+# Se usa SUPERPUESTO al archivo base:
+#   docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+# (o simplemente: npm run docker:postgres)
+#
+# Servicios:
+#   db      → PostgreSQL 17 + PostGIS 3.5, con volumen persistente y healthcheck.
+#   migrate → tarea de una sola vez: aplica las migraciones de prisma/ y carga la
+#             semilla (los 24 eventos de demostración). Es idempotente.
+#   app     → el mismo servicio de docker-compose.yml, pero con
+#             DATA_SOURCE=postgres y DATABASE_URL apuntando a "db".
+#
+# Credenciales: son SOLO de desarrollo local y se pueden cambiar con la variable
+# POSTGRES_PASSWORD (por ejemplo en un archivo .env junto a este). No usar estos
+# valores por defecto fuera de tu máquina.
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    container_name: mozak-db
+    environment:
+      POSTGRES_USER: mozak
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mozak_dev}
+      POSTGRES_DB: mozak
+    ports:
+      # Solo accesible desde tu propio equipo (127.0.0.1). Cambia DB_PORT si el 5432 está ocupado.
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - mozak-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mozak -d mozak"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tools
+    image: mozak-apt-tools:local
+    container_name: mozak-migrate
+    environment:
+      DATABASE_URL: postgresql://mozak:${POSTGRES_PASSWORD:-mozak_dev}@db:5432/mozak?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    environment:
+      - DATA_SOURCE=postgres
+      - DATABASE_URL=postgresql://mozak:${POSTGRES_PASSWORD:-mozak_dev}@db:5432/mozak?schema=public
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  mozak-db-data:

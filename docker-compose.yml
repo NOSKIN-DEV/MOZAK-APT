@@ -26,10 +26,7 @@ services:
       retries: 5
       start_period: 10s
 
-# Nota: el servicio "db" (PostgreSQL + PostGIS) descrito en el documento
-# «Arquitectura del Sistema» corresponde a la épica futura "Persistencia
-# PostgreSQL/PostGIS" (ver Planificación del Proyecto → Product Backlog),
-# NO a esta Etapa 9. Hoy el prototipo usa datos mock en memoria
-# (MockEventRepository), así que agregar un servicio "db" ahora sería
-# infraestructura sin nada que la use. Se añadirá en esa épica futura,
-# junto con la implementación de PostgresEventRepository.
+# Este archivo es el modo MOCK (por defecto): una sola pieza, sin base de datos.
+# El modo PostgreSQL (servicio "db" con PostGIS, tarea "migrate" y la app
+# apuntando a la base) está en docker-compose.postgres.yml y se superpone a
+# este archivo: ver README → "Docker con PostgreSQL" o `npm run docker:postgres`.
