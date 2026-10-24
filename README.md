@@ -28,7 +28,7 @@ funcional con datos de prueba locales.
 - Next.js 16.x + React 19.x + TypeScript 5.9.x
 - Tailwind CSS 4.x
 - Zod 4.x (validación de datos)
-- PostgreSQL 17.x + PostGIS 3.5.x + Prisma 6.x *(etapas futuras)*
+- PostgreSQL 17.x + PostGIS 3.5.x + Prisma 6.x *(persistencia opcional desde la Etapa 11; el modo por defecto sigue siendo mock)*
 - Docker
 - Capacitor 8.x + Android Studio *(versión móvil futura)*
 
@@ -72,8 +72,9 @@ Copiar `.env.example` a `.env.local` y ajustar según corresponda:
 cp .env.example .env.local
 ```
 
-En el prototipo, `DATA_SOURCE=mock` es suficiente: no se requiere base de
-datos todavía.
+Con `DATA_SOURCE=mock` (valor por defecto) no se requiere base de datos.
+Para usar PostgreSQL (`DATA_SOURCE=postgres`) hace falta además
+`DATABASE_URL`; ver la sección «PostgreSQL (Etapa 11)».
 
 ## Estructura del proyecto
 
@@ -86,11 +87,16 @@ src/
   components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
-    repositories/      Abstracción EventRepository + MockEventRepository
+    repositories/      Abstracción EventRepository + MockEventRepository + PostgresEventRepository + fábrica por DATA_SOURCE
+    db/                Cliente de Prisma compartido (solo se carga con DATA_SOURCE=postgres)
     api/               Serialización de eventos y parseo de query params para la API
     format.ts          Formato de precio (CLP) y fechas en español
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
+prisma/
+  schema.prisma        Modelos de la base (Category, Venue, Source, Event)
+  migrations/          Migración SQL inicial (extensiones, tablas, restricciones CHECK, índices)
+  seed.ts              Carga los 24 eventos de demostración en PostgreSQL (npm run db:seed)
 public/
   media/           Afiches (posters/) y videos (videos/) de los eventos (Etapa 10)
 docs/            Documentación técnica ampliada (Etapa 10)
@@ -193,7 +199,12 @@ incorrecto al cargar la página.
 | `npm run build`     | Genera el build de producción                   |
 | `npm run start`     | Sirve el build de producción                    |
 | `npm run lint`      | Ejecuta ESLint                                  |
-| `npm run test`      | Ejecuta las pruebas (Vitest)                    |
+| `npm run test`      | Ejecuta las pruebas (Vitest); no requiere base de datos |
+| `npm run test:db`   | Pruebas contra PostgreSQL real (requiere base levantada y con semilla) |
+| `npm run db:migrate`| Aplica las migraciones de `prisma/` a la base de `DATABASE_URL` |
+| `npm run db:seed`   | Carga los datos de demostración en PostgreSQL (idempotente) |
+| `npm run docker:mock` | Docker en modo mock (igual que `docker compose up --build`) |
+| `npm run docker:postgres` | Docker con PostgreSQL + PostGIS (ver sección «Docker») |
 | `npm run check:data`| Valida los datos mock y prueba filtros combinados |
 
 ## Pruebas
@@ -210,7 +221,12 @@ npm run test:watch # modo watch, útil mientras se desarrolla
 |---|---|
 | `src/lib/format.test.ts` | `formatPrice` (gratis/pagado, formato CLP) y `formatEventDate` (fecha única vs. rango) |
 | `src/lib/api/parse-event-query.test.ts` | Parseo y validación de los query params de `GET /api/events` |
-| `src/lib/repositories/mock-event-repository.test.ts` | `MockEventRepository`: búsqueda por texto, filtro por categoría, por comuna, por fecha (incluye eventos multi-día), gratis/pagado, combinación de filtros con AND, `findById` |
+| `src/lib/repositories/event-repository.contract.ts` | Batería de **contrato** de `EventRepository` (búsqueda por texto, categoría, comuna, fecha incluyendo eventos multi-día, gratis/pagado, combinación con AND, `findById`). La ejecutan `MockEventRepository` y `PostgresEventRepository` (Etapa 11) |
+| `src/lib/repositories/mock-event-repository.test.ts` | Ejecuta el contrato contra `MockEventRepository` |
+| `src/lib/repositories/factory.test.ts` | Selección de la fuente de datos con `DATA_SOURCE` (Etapa 11) |
+| `src/lib/repositories/postgres-mapping.test.ts` | Conversión fila de base de datos ↔ dominio; las 24 filas de demostración dan el mismo resultado que el mock (Etapa 11) |
+| `src/lib/repositories/postgres-text-filters.test.ts` | Consulta SQL parametrizada de búsqueda y comuna (Etapa 11) |
+| `src/lib/repositories/postgres-event-repository.db.test.ts` | **Solo con `npm run test:db`**: el mismo contrato contra PostgreSQL real, más PostGIS y restricciones CHECK/claves foráneas (Etapa 11) |
 | `src/app/api/events/route.test.ts` | `GET /api/events`: 200 con JSON válido, filtros combinados, 400 ante parámetros inválidos |
 | `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento (incluye `posterImageUrl`/`videoUrl`), 404 si no existe |
 | `src/app/api/categories/route.test.ts` | `GET /api/categories`: 200 con las 9 categorías |
@@ -248,18 +264,86 @@ docker compose down
 - `.dockerignore` — evita copiar `node_modules`, `.next`, `.git` y archivos
   locales al contexto de build.
 
-**Por qué no hay un servicio `db` todavía:** el prototipo sigue usando datos
-mock en memoria (`MockEventRepository`), no PostgreSQL. Agregar un
-contenedor de base de datos que nada usa sería infraestructura de más. El
-servicio `db` (PostgreSQL + PostGIS, ver documento «Arquitectura del
-Sistema») se incorporará cuando se implemente la persistencia real, junto
-con un `PostgresEventRepository`.
+**Modo mock y modo PostgreSQL:** `docker-compose.yml` es el modo mock (un
+solo servicio, sin base de datos). El modo PostgreSQL vive en
+`docker-compose.postgres.yml` y se superpone al anterior (ver «Docker con
+PostgreSQL» más abajo), de modo que el flujo ya verificado
+(`docker compose up --build`) no cambia.
 
 > **Nota:** construir la imagen requiere acceso a internet (para traer la
 > imagen base `node:22-slim` y para `npm install` dentro del build). La
 > primera construcción demora unos 2 minutos; las siguientes reutilizan
 > las capas en caché. Verificado con `docker compose up --build` en
 > Docker Desktop sobre Windows.
+
+### Docker con PostgreSQL
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+# equivalente: npm run docker:postgres
+```
+
+Levanta tres servicios: `db` (imagen `postgis/postgis:17-3.5`, volumen
+persistente `mozak-db-data`, healthcheck con `pg_isready`), `migrate` (tarea de
+una sola vez que aplica las migraciones y carga la semilla; termina y sale) y
+`app` (con `DATA_SOURCE=postgres`). Cuando `migrate` termina bien, arranca la
+app en `http://localhost:3000`, mostrando los mismos 24 eventos pero leídos
+desde PostgreSQL.
+
+- Credenciales de **desarrollo local**: usuario `mozak`, base `mozak`,
+  contraseña `mozak_dev` (cámbiala con la variable `POSTGRES_PASSWORD`). El
+  puerto 5432 solo se publica en `127.0.0.1`; si lo tienes ocupado, define
+  `DB_PORT` (por ejemplo `5433`).
+- Detener: `docker compose -f docker-compose.yml -f docker-compose.postgres.yml down`
+  (agrega `-v` para borrar también los datos de la base).
+
+## PostgreSQL (Etapa 11)
+
+La aplicación puede leer los eventos desde PostgreSQL + PostGIS en lugar de los
+datos mock, **sin cambiar la API ni el frontend**: `DATA_SOURCE` decide qué
+implementación de `EventRepository` se usa (`mock` por defecto, `postgres`).
+
+**Ejecución local con la base en Docker** (la app corre con `npm run dev`):
+
+```bash
+# 1) Solo la base de datos
+docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d db
+
+# 2) Variables: crea un archivo ".env" (lo leen Prisma y Next.js) con:
+#    DATA_SOURCE=postgres
+#    DATABASE_URL="postgresql://mozak:mozak_dev@localhost:5432/mozak?schema=public"
+
+# 3) Instalar dependencias (genera el cliente de Prisma), migrar y cargar datos
+npm install
+npm run db:migrate
+npm run db:seed
+
+# 4) Levantar la app y probar
+npm run dev
+npm run test:db
+```
+
+Qué hace cada pieza:
+
+- `prisma/schema.prisma` — modelos `Category`, `Venue`, `Source`, `Event`.
+- `prisma/migrations/0001_init/migration.sql` — escrita a mano a partir del
+  «Modelo de Datos»: habilita las extensiones `postgis` y `unaccent`, crea las
+  tablas, las claves foráneas, los índices y las restricciones `CHECK` (precio
+  ↔ gratuidad, `end_date ≥ start_date`, formato de afiche/video, rangos de
+  latitud/longitud), las mismas reglas que valida Zod.
+- `prisma/seed.ts` — carga los datos de `src/data/*` (valida con Zod; usa
+  `upsert`, así que se puede repetir sin duplicar).
+- `PostgresEventRepository` — traduce cada filtro a SQL. La búsqueda y la
+  comuna usan `unaccent` para ignorar tildes y mayúsculas igual que el mock; el
+  resto de los filtros usa consultas tipadas de Prisma. Todo con parámetros, sin
+  concatenar texto del usuario.
+- Orden: por id (igual que el mock). Orden por fecha y paginación son otra
+  historia (Sprint 4).
+
+**Alcance de esta etapa:** la extensión PostGIS queda habilitada, pero la
+columna geográfica de `venue` (para la búsqueda por proximidad, HU-25) se agrega
+en esa historia. Esta etapa **no** cambia el mapa de la página de detalle, no
+incluye redirección a Google Maps ni inicio de sesión de usuarios.
 
 ## Estado del prototipo
 
@@ -273,6 +357,8 @@ con un `PostgresEventRepository`.
 - ✅ **Etapa 8** — Pruebas automatizadas (Épica APT-8, Sprint 2): suite de Vitest (7 archivos, 41 pruebas — ver sección «Pruebas»), con pruebas unitarias del repositorio/utilidades y pruebas de integración de la API interna, usando los datos mock reales. **Verificado**: `npm run test` ejecutado en un entorno con npm — 7/7 archivos y 41/41 pruebas en verde.
 - ✅ **Etapa 9** — Docker (Sprint 3): `Dockerfile` multi-stage (`deps` → `build` → `runner`, imagen final liviana con el build standalone de Next.js) y `docker-compose.yml` (servicio `app`, puerto 3000, healthcheck). Ver sección «Docker» más abajo. **Verificado**: `docker compose up --build` ejecutado en Docker Desktop (Windows); la imagen se construyó (~107 s la primera vez) y Next.js 16.0.1 quedó "Ready" en el puerto 3000.
 - ✅ **Etapa 10** — Afiche y video del evento + documentación técnica ampliada (Sprint 3): el detalle de evento muestra el afiche de fondo y el video sobre él (nuevos campos `posterImageUrl`/`videoUrl`, validación, API, 24 afiches y 3 videos de demostración); nuevo `docs/DOCUMENTACION-TECNICA.md` (arquitectura, modelo, API, guía multimedia, solución de problemas). Se agregaron 18 pruebas. **Verificado:** `npm run test` pasa en verde (8 archivos, 59 pruebas) en el entorno del usuario; la revisión visual en el navegador queda a cargo del usuario.
+
+- ⏳ **Etapa 11** — Persistencia PostgreSQL + PostGIS + Prisma (Sprint 4, HU-20): esquema Prisma, migración SQL inicial, semilla con los 24 eventos, `PostgresEventRepository` (misma batería de contrato que el mock), selección por `DATA_SOURCE` (mock por defecto), servicio `db` (`postgis/postgis:17-3.5`) y tarea `migrate` en `docker-compose.postgres.yml`. **Estado de verificación:** la migración SQL y las consultas de búsqueda/comuna se ejecutaron contra un PostgreSQL 16 real en el entorno de desarrollo (sin PostGIS); el resto (Prisma, Docker, `npm run test`, `npm run test:db`) **queda pendiente de verificar en el entorno del usuario**.
 
 ## Documentación de la evaluación
 
@@ -289,6 +375,6 @@ Además de este README, el proyecto cuenta con un documento maestro vivo (Claude
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Reemplazo de datos mock por PostgreSQL + PostGIS y fuentes externas
-  reales, pagos, cuentas de usuario avanzadas, notificaciones, panel
+- Fuentes externas reales (ETL), fin del uso de datos mock en producción,
+  búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones, panel
   administrativo, versión Android vía Capacitor.

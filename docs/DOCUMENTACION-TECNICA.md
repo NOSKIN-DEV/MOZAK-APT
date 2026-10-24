@@ -1,7 +1,8 @@
 # Documentación técnica — MOZAK (APT)
 
 Documento de referencia para quien vaya a mantener o ampliar el proyecto
-(Etapa 10). Complementa al `README.md`, que cubre instalación y uso básico.
+(Etapa 10, actualizado en la Etapa 11 con la persistencia en PostgreSQL).
+Complementa al `README.md`, que cubre instalación y uso básico.
 
 ## 1. Arquitectura
 
@@ -17,8 +18,9 @@ Documento de referencia para quien vaya a mantener o ampliar el proyecto
 └───────────────────────────────┬─────────────────────────────────────┘
                                 │ interfaz EventRepository
 ┌───────────────────────────────▼─────────────────────────────────────┐
-│  MockEventRepository (hoy)    →    PostgresEventRepository (futuro) │
-│  lee src/data/*                    leerá PostgreSQL + PostGIS       │
+│  DATA_SOURCE=mock (defecto)   |    DATA_SOURCE=postgres            │
+│  MockEventRepository               PostgresEventRepository          │
+│  lee src/data/*                    lee PostgreSQL + PostGIS (Prisma)│
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -28,7 +30,9 @@ Reglas que sostienen la arquitectura:
   API interna; así reemplazar los datos mock por PostgreSQL no obliga a
   tocar el frontend.
 - **Todo acceso a datos pasa por `EventRepository`**
-  (`src/lib/repositories/event-repository.ts`).
+  (`src/lib/repositories/event-repository.ts`). Qué implementación hay detrás
+  lo decide `DATA_SOURCE` (`src/lib/repositories/factory.ts`); la API y el
+  frontend no cambian entre `mock` y `postgres`.
 - **Toda entrada se valida con Zod** (`src/lib/schemas.ts`) antes de llegar al
   repositorio: un parámetro inválido responde `400`, no falla más adentro.
 - **Los datos mock son ficticios** y están marcados como datos de
@@ -41,7 +45,9 @@ Reglas que sostienen la arquitectura:
 | `src/app/` | Páginas (App Router) y rutas de la API interna |
 | `src/components/` | Componentes de interfaz (`EventCard`, `EventMedia`, `FiltersBar`, …) |
 | `src/lib/schemas.ts` | Esquemas Zod de Category / Venue / Source / Event y filtros |
-| `src/lib/repositories/` | Interfaz `EventRepository` y `MockEventRepository` |
+| `src/lib/repositories/` | Interfaz `EventRepository`, `MockEventRepository`, `PostgresEventRepository`, fábrica por `DATA_SOURCE` y batería de contrato compartida |
+| `src/lib/db/` | Cliente de Prisma (singleton), solo se carga con `DATA_SOURCE=postgres` |
+| `prisma/` | `schema.prisma`, migración SQL inicial y semilla (`seed.ts`) |
 | `src/lib/api/` | Serialización (`toApiEvent`) y parseo de query params |
 | `src/data/` | Datos mock: 24 eventos, 12 venues, 3 fuentes, 9 categorías |
 | `src/types/` | Modelos TypeScript |
@@ -170,18 +176,59 @@ inicial, porque el valor termina en un atributo `src`.
 
 ## 5. Pruebas
 
-`npm run test` ejecuta Vitest (sin servidor): pruebas unitarias del
-repositorio y utilidades, e integración de las rutas de la API invocando
-directamente sus handlers. Usan los datos mock reales. Detalle por archivo
-en la sección «Pruebas» del README. Pendiente a futuro: pruebas E2E con
-Playwright (MTC_00280/00290) y pruebas de rendimiento.
+`npm run test` ejecuta Vitest (sin servidor ni base de datos): pruebas
+unitarias del repositorio y utilidades, e integración de las rutas de la API
+invocando directamente sus handlers. Usan los datos mock reales. Detalle por
+archivo en la sección «Pruebas» del README. Pendiente a futuro: pruebas E2E
+con Playwright (MTC_00280/00290) y pruebas de rendimiento.
+
+**Batería de contrato (Etapa 11).** Las pruebas del repositorio viven en
+`src/lib/repositories/event-repository.contract.ts` y se ejecutan contra
+cada implementación de `EventRepository`: `MockEventRepository` en
+`npm run test`, y `PostgresEventRepository` en `npm run test:db` (archivos
+`*.db.test.ts`, requieren la base levantada con migración y semilla). Si
+ambas implementaciones pasan la misma batería, cambiar `DATA_SOURCE` no altera
+el comportamiento visible.
+
+## 5.1 Persistencia en PostgreSQL (Etapa 11)
+
+- **Esquema:** `prisma/schema.prisma` (modelos `Category`, `Venue`, `Source`,
+  `Event`; tablas y columnas en snake_case). La migración inicial
+  (`prisma/migrations/0001_init/migration.sql`) está escrita a mano y agrega lo
+  que Prisma no modela: extensiones `postgis` y `unaccent`, y restricciones
+  `CHECK` (gratuidad ↔ precio, fechas, formato de afiche/video, rangos de
+  coordenadas).
+- **Diferencias con el documento «Modelo de Datos» original:** `price` es
+  `integer` (CLP no tiene decimales) y `latitude`/`longitude` son
+  `double precision` (más simple de mapear en Prisma); `category.sort_order`
+  conserva el orden de presentación del filtro; la columna
+  `venue.location geography(Point, 4326)` y su índice GiST **se agregan con la
+  historia de proximidad (HU-25)**, no en esta etapa (una columna generada que
+  Prisma no conoce provocaría diferencias en `migrate dev`). PostGIS ya queda
+  habilitado.
+- **Filtros:** búsqueda y comuna se resuelven con SQL parametrizado y
+  `unaccent` (igual semántica que `normalize()` del mock: sin mayúsculas ni
+  tildes); categoría, gratis y fechas, con consultas tipadas de Prisma.
+  Los eventos que solapan la ventana `[dateFrom, dateTo]` se incluyen igual
+  que en el mock. Orden: por id.
+- **Fechas y horas:** Prisma entrega `DATE`/`TIME` como `Date` en UTC;
+  `postgres-mapping.ts` los convierte a `YYYY-MM-DD` / `HH:mm`.
+- **Comandos:** `npm run db:migrate`, `npm run db:seed`, `npm run test:db`
+  (ver «PostgreSQL» en el README).
 
 ## 6. Docker
 
 `docker compose up --build` construye una imagen multi-stage
-(`deps → build → runner`) con el servidor *standalone* de Next.js y la
-expone en `http://localhost:3000`. `public/` (incluido `public/media/`) se
-copia a la imagen final. Más detalle en la sección «Docker» del README.
+(`base → deps → build → runner`, más una etapa `tools` para migraciones) con el
+servidor *standalone* de Next.js y la expone en `http://localhost:3000`
+(modo mock). `public/` (incluido `public/media/`) se copia a la imagen final.
+
+Modo PostgreSQL: `docker compose -f docker-compose.yml -f
+docker-compose.postgres.yml up --build` (o `npm run docker:postgres`) agrega
+el servicio `db` (`postgis/postgis:17-3.5`, volumen y healthcheck), la tarea
+`migrate` (aplica migraciones y semilla) y arranca la app con
+`DATA_SOURCE=postgres`. La imagen incluye OpenSSL porque el motor de Prisma lo
+necesita. Más detalle en la sección «Docker» del README.
 
 ## 7. Convenciones
 
@@ -202,14 +249,21 @@ copia a la imagen final. Más detalle en la sección «Docker» del README.
 | `docker compose` no conecta | Abre Docker Desktop y espera a «Engine running» |
 | El video no se reproduce | Verifica que sea MP4 H.264 y que la ruta exista bajo `public/`; el navegador lo descarta solo y muestra el afiche |
 | Los cambios de datos no aparecen en Docker | Reconstruye con `docker compose up --build` |
+| `DATA_SOURCE inválido` / `requiere definir DATABASE_URL` | `DATA_SOURCE` solo acepta `mock` o `postgres`; con `postgres` hay que definir `DATABASE_URL` (ver `.env.example`) |
+| `Environment variable not found: DATABASE_URL` en `prisma migrate` | La CLI de Prisma lee `.env` (no `.env.local`): crea `.env` con `DATABASE_URL` |
+| `Can't reach database server` | Levanta el servicio `db` (`docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d db`) y revisa host/puerto de `DATABASE_URL` (`localhost` fuera de Docker, `db` dentro) |
+| `npm run test:db` falla al conectar o con 0 eventos | Falta aplicar `npm run db:migrate` y `npm run db:seed` |
+| Puerto 5432 ocupado | Define `DB_PORT=5433` y ajusta el puerto en `DATABASE_URL` |
 
 ## 9. Limitaciones conocidas y trabajo futuro
 
-- Datos mock en memoria: PostgreSQL + PostGIS y un `PostgresEventRepository`
-  están pendientes (épica futura); al llegar, se agrega el servicio `db` al
-  `docker-compose.yml`.
+- El modo por defecto sigue siendo `mock`; dejar de usar datos mock en la
+  aplicación real (HU-29) y cargar eventos reales (ETL) son historias
+  posteriores. La columna geográfica de `venue` y la búsqueda por
+  proximidad quedan para HU-25.
 - No hay `package-lock.json` versionado; las dependencias están fijadas a
-  versiones exactas en `package.json`.
+  versiones exactas en `package.json`, salvo `prisma` y `@prisma/client`
+  (`^6.16.0`, rango 6.x; conviene fijarlos al versionar el lockfile).
 - Brechas detectadas por el plan de pruebas: ordenamiento por fecha
   (MTC_00110) y paginación (MTC_00190).
 - Los afiches y videos son de demostración; en producción deberían servirse
