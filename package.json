@@ -10,12 +10,19 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:data": "tsx scripts/check-mock-data.ts"
+    "test:db": "vitest run --config vitest.db.config.ts",
+    "check:data": "tsx scripts/check-mock-data.ts",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "docker:mock": "docker compose up --build",
+    "docker:postgres": "docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build"
   },
   "engines": {
     "node": ">=22.0.0 <23.0.0"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.0",
     "next": "16.0.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -33,6 +40,10 @@
     "@tailwindcss/postcss": "4.3.1",
     "postcss": "8.4.49",
     "tsx": "4.19.2",
-    "vitest": "2.1.8"
+    "vitest": "2.1.8",
+    "prisma": "^6.16.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

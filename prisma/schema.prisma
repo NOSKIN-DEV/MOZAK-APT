@@ -1,0 +1,92 @@
+// Esquema Prisma de MOZAK (APT) — Etapa 11 (persistencia PostgreSQL).
+//
+// Refleja el "Modelo físico" del documento «Modelo de Datos». Las tablas y
+// columnas de la base usan snake_case (@@map / @map) mientras que el código
+// TypeScript sigue usando camelCase, igual que el tipo `Event` de src/types.
+//
+// Lo que Prisma NO modela y vive solo en la migración SQL:
+//   - extensiones `postgis` y `unaccent`
+//   - restricciones CHECK (precio/gratuidad, fechas, formato de afiche/video,
+//     rangos de latitud/longitud)
+// La columna `location geography(Point, 4326)` de `venue` se agrega junto con
+// la historia de búsqueda por proximidad (HU-25), no en esta etapa.
+//
+// La migración se escribe a mano (prisma/migrations/0001_init/migration.sql) y
+// se aplica con `prisma migrate deploy`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String  @id
+  name        String
+  description String
+  /// Orden de presentación en el filtro (el mock lo daba por el orden del arreglo).
+  sortOrder   Int     @default(0) @map("sort_order")
+  events      Event[]
+
+  @@map("category")
+}
+
+model Venue {
+  id        String  @id
+  name      String
+  address   String
+  commune   String
+  city      String
+  latitude  Float
+  longitude Float
+  events    Event[]
+
+  @@map("venue")
+}
+
+model Source {
+  id           String  @id
+  name         String
+  organization String
+  type         String
+  url          String
+  apiUrl       String? @map("api_url")
+  active       Boolean @default(true)
+  events       Event[]
+
+  @@map("source")
+}
+
+model Event {
+  id             String   @id
+  externalId     String?  @map("external_id")
+  title          String
+  description    String
+  categoryId     String   @map("category_id")
+  startDate      DateTime @map("start_date") @db.Date
+  endDate        DateTime @map("end_date") @db.Date
+  startTime      DateTime @map("start_time") @db.Time(0)
+  endTime        DateTime @map("end_time") @db.Time(0)
+  /// Precio en pesos chilenos (CLP), sin decimales.
+  price          Int
+  isFree         Boolean  @map("is_free")
+  imageUrl       String?  @map("image_url")
+  posterImageUrl String?  @map("poster_image_url")
+  videoUrl       String?  @map("video_url")
+  sourceUrl      String   @map("source_url")
+  sourceId       String   @map("source_id")
+  venueId        String   @map("venue_id")
+
+  category Category @relation(fields: [categoryId], references: [id])
+  source   Source   @relation(fields: [sourceId], references: [id])
+  venue    Venue    @relation(fields: [venueId], references: [id])
+
+  @@index([categoryId], map: "event_category_idx")
+  @@index([venueId], map: "event_venue_idx")
+  @@index([sourceId], map: "event_source_idx")
+  @@index([startDate, endDate], map: "event_dates_idx")
+  @@map("event")
+}
