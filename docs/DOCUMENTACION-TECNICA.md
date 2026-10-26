@@ -253,6 +253,7 @@ necesita. Más detalle en la sección «Docker» del README.
 | `Environment variable not found: DATABASE_URL` en `prisma migrate` | La CLI de Prisma lee `.env` (no `.env.local`): crea `.env` con `DATABASE_URL` |
 | `Can't reach database server` | Levanta el servicio `db` (`docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d db`) y revisa host/puerto de `DATABASE_URL` (`localhost` fuera de Docker, `db` dentro) |
 | `npm run test:db` falla al conectar o con 0 eventos | Falta aplicar `npm run db:migrate` y `npm run db:seed` |
+| `migrate` falla con `P1001: Can't reach database server at db:5432` en el primer arranque | En el primer arranque la imagen de PostgreSQL usa un servidor temporal solo por socket. El healthcheck de `db` usa `-h 127.0.0.1` (TCP) para no darlo por listo antes de tiempo; si ocurre igual, vuelve a ejecutar el mismo `docker compose ... up` (la base ya queda inicializada) |
 | Puerto 5432 ocupado | Define `DB_PORT=5433` y ajusta el puerto en `DATABASE_URL` |
 
 ## 9. Limitaciones conocidas y trabajo futuro

@@ -30,7 +30,11 @@ services:
       - mozak-db-data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mozak -d mozak"]
+      # "-h 127.0.0.1" fuerza la conexión por red (TCP). En el PRIMER arranque la
+      # imagen levanta un servidor temporal que solo escucha por socket Unix para
+      # crear la base; sin este flag, pg_isready lo daba por listo y "migrate"
+      # fallaba con P1001 (no se podía conectar a db:5432).
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U mozak -d mozak"]
       interval: 5s
       timeout: 5s
       retries: 10
