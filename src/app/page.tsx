@@ -7,27 +7,15 @@ import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
 import { FiltersBar, initialFiltersState, type FiltersState } from "@/components/FiltersBar";
 import { EventGrid } from "@/components/EventGrid";
-import type { ApiEvent } from "@/lib/api";
+import { Pagination } from "@/components/Pagination";
+import { ResultsToolbar } from "@/components/ResultsToolbar";
+import { buildEventsQuery } from "@/lib/api/build-events-query";
+import type { ApiEvent, ApiEventsMeta } from "@/lib/api";
+import type { EventSort } from "@/lib/schemas";
 import type { Category } from "@/types";
 
-function buildQueryString(search: string, filters: FiltersState): string {
-  const params = new URLSearchParams();
-
-  if (search.trim() !== "") params.set("search", search.trim());
-  if (filters.category !== "") params.set("category", filters.category);
-  if (filters.commune !== "") params.set("commune", filters.commune);
-  if (filters.date !== "") {
-    // Un evento "ocurre" en la fecha elegida si esa fecha cae dentro de
-    // su rango [startDate, endDate], por eso se manda como dateFrom=dateTo.
-    params.set("dateFrom", filters.date);
-    params.set("dateTo", filters.date);
-  }
-  if (filters.priceFilter === "free") params.set("isFree", "true");
-  if (filters.priceFilter === "paid") params.set("isFree", "false");
-
-  const query = params.toString();
-  return query ? `?${query}` : "";
-}
+// Eventos por página en el listado (la API admite hasta 100; 12 llena bien la grilla de 2, 3 y 4 columnas).
+const PAGE_SIZE = 12;
 
 function HomePageContent() {
   // Permite llegar desde otra página con una búsqueda ya aplicada,
@@ -38,8 +26,11 @@ function HomePageContent() {
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [filters, setFilters] = useState<FiltersState>(initialFiltersState);
+  const [sort, setSort] = useState<EventSort>("date_asc");
+  const [pageNumber, setPageNumber] = useState(1);
 
   const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [meta, setMeta] = useState<ApiEventsMeta | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [communes, setCommunes] = useState<string[]>([]);
 
@@ -63,24 +54,47 @@ function HomePageContent() {
   // escriba antes de disparar la consulta, para no golpear la API en
   // cada tecla.
   useEffect(() => {
-    const timeoutId = setTimeout(() => setDebouncedSearch(search), 300);
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPageNumber(1); // una búsqueda nueva siempre vuelve a la primera página
+    }, 300);
     return () => clearTimeout(timeoutId);
   }, [search]);
 
-  // Consulta a la API cada vez que cambian la búsqueda (ya con debounce)
-  // o los filtros. Todos los criterios se combinan con AND en el
-  // backend (ver src/lib/repositories/mock-event-repository.ts).
+  // Consulta a la API cada vez que cambian la búsqueda (ya con debounce),
+  // los filtros, el orden o la página. Todos los criterios se combinan con AND
+  // en el backend (ver src/lib/repositories/).
   useEffect(() => {
     const controller = new AbortController();
     setIsLoading(true);
     setError(null);
 
-    fetch(`/api/events${buildQueryString(debouncedSearch, filters)}`, { signal: controller.signal })
+    const query = buildEventsQuery({
+      search: debouncedSearch,
+      category: filters.category,
+      commune: filters.commune,
+      date: filters.date,
+      priceFilter: filters.priceFilter,
+      sort,
+      page: pageNumber,
+      limit: PAGE_SIZE,
+    });
+
+    fetch(`/api/events${query}`, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error("No se pudieron cargar los eventos");
         return res.json();
       })
-      .then((body) => setEvents(body.data))
+      .then((body) => {
+        // Si la página pedida quedó fuera de rango (los datos cambiaron entre
+        // una consulta y otra) pero sí hay resultados, se vuelve a la primera.
+        if (body.data.length === 0 && body.meta.total > 0 && pageNumber > 1) {
+          setPageNumber(1);
+          return;
+        }
+        setEvents(body.data);
+        setMeta(body.meta);
+      })
       .catch((err) => {
         if (err.name !== "AbortError") {
           setError("Ocurrió un error al cargar los eventos. Intenta nuevamente.");
@@ -89,11 +103,27 @@ function HomePageContent() {
       .finally(() => setIsLoading(false));
 
     return () => controller.abort();
-  }, [debouncedSearch, filters]);
+  }, [debouncedSearch, filters, sort, pageNumber]);
+
+  const handleFiltersChange = (next: FiltersState) => {
+    setFilters(next);
+    setPageNumber(1);
+  };
+
+  const handleSortChange = (next: EventSort) => {
+    setSort(next);
+    setPageNumber(1);
+  };
+
+  const handlePageChange = (next: number) => {
+    setPageNumber(next);
+    document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const handleClearFilters = () => {
     setFilters(initialFiltersState);
     setSearch("");
+    setPageNumber(1);
   };
 
   const hasActiveFiltersOrSearch =
@@ -113,13 +143,18 @@ function HomePageContent() {
         categories={categories}
         communes={communes}
         filters={filters}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         onClear={handleClearFilters}
       />
-      {!isLoading && !error && (
-        <p className="mx-auto max-w-6xl px-4 pb-2 text-sm text-gray-500 dark:text-gray-400">
-          {events.length} {events.length === 1 ? "evento encontrado" : "eventos encontrados"}
-        </p>
+      {!error && meta !== null && (
+        <ResultsToolbar
+          total={meta.total}
+          page={meta.page}
+          pageSize={PAGE_SIZE}
+          shown={events.length}
+          sort={sort}
+          onSortChange={handleSortChange}
+        />
       )}
       <EventGrid
         events={events}
@@ -127,6 +162,9 @@ function HomePageContent() {
         error={error}
         hasActiveFiltersOrSearch={hasActiveFiltersOrSearch}
       />
+      {!isLoading && !error && events.length > 0 && meta !== null && (
+        <Pagination page={meta.page} totalPages={meta.totalPages} onPageChange={handlePageChange} />
+      )}
     </div>
   );
 }

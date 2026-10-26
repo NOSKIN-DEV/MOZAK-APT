@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEventDate, formatPrice } from "./format";
+import { formatEventDate, formatPrice, formatResultsSummary } from "./format";
 
 /**
  * Épica APT-8 (Sprint 2) — pruebas unitarias de funciones puras de
@@ -35,5 +35,20 @@ describe("formatEventDate", () => {
     const expectedStart = dateFormatter.format(new Date("2026-10-03T00:00:00"));
     const expectedEnd = dateFormatter.format(new Date("2026-10-20T00:00:00"));
     expect(formatEventDate("2026-10-03", "2026-10-20")).toBe(`${expectedStart} – ${expectedEnd}`);
+  });
+});
+
+describe("formatResultsSummary", () => {
+  it("si todo cabe en una página mantiene el texto de siempre", () => {
+    expect(formatResultsSummary(5, 1, 12, 5)).toBe("5 eventos encontrados");
+    expect(formatResultsSummary(1, 1, 12, 1)).toBe("1 evento encontrado");
+    expect(formatResultsSummary(0, 1, 12, 0)).toBe("0 eventos encontrados");
+    expect(formatResultsSummary(12, 1, 12, 12)).toBe("12 eventos encontrados");
+  });
+
+  it("con varias páginas indica el tramo mostrado", () => {
+    expect(formatResultsSummary(24, 1, 12, 12)).toBe("Mostrando 1–12 de 24 eventos");
+    expect(formatResultsSummary(24, 2, 12, 12)).toBe("Mostrando 13–24 de 24 eventos");
+    expect(formatResultsSummary(25, 3, 12, 1)).toBe("Mostrando 25–25 de 25 eventos");
   });
 });

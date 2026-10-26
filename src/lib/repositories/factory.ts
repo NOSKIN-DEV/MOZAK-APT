@@ -58,6 +58,7 @@ function getRepository(): Promise<EventRepository> {
  */
 export const eventRepository: EventRepository = {
   findAll: async (filters) => (await getRepository()).findAll(filters),
+  findPage: async (filters, options) => (await getRepository()).findPage(filters, options),
   findById: async (id) => (await getRepository()).findById(id),
   findAllCategories: async () => (await getRepository()).findAllCategories(),
   findAllCommunes: async () => (await getRepository()).findAllCommunes(),

@@ -1,7 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { Category } from "@/types";
-import type { EventFilters } from "@/lib/schemas";
-import type { EventRepository, EventWithRelations } from "./event-repository";
+import type { EventFilters, EventListOptions } from "@/lib/schemas";
+import type { EventPage, EventRepository, EventWithRelations } from "./event-repository";
+import { buildPage, resolveListOptions } from "./pagination";
 import { toCategory, toDbDate, toEventWithRelations } from "./postgres-mapping";
 import { buildTextFilterQuery } from "./postgres-text-filters";
 
@@ -23,13 +24,22 @@ const WITH_RELATIONS = { category: true, venue: true, source: true } as const;
  *    se solapa con la ventana pedida.
  *  - Todos los filtros se combinan con AND.
  *
- * Orden: por id ascendente (igual que el orden del arreglo mock). El orden
- * por fecha y la paginación son otra historia del Sprint 4 (HU-21).
+ * Orden: findAll() ordena por id (igual que el arreglo mock). findPage()
+ * (Etapa 13) ordena por fecha de inicio, hora de inicio e id, y pagina en la
+ * base de datos con skip/take; el total sale de un count con los mismos
+ * filtros, ambos dentro de una transacción.
+ *
+ * Se asume que los filtros ya pasaron por eventFiltersSchema (largo máximo y
+ * sin caracteres de control: PostgreSQL no acepta el byte nulo en un texto).
  */
 export class PostgresEventRepository implements EventRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(filters: EventFilters = {}): Promise<EventWithRelations[]> {
+  /**
+   * Traduce los filtros a un `where` de Prisma. Devuelve null cuando los
+   * filtros de texto no coinciden con ningún evento (no hace falta consultar más).
+   */
+  private async buildWhere(filters: EventFilters): Promise<Prisma.EventWhereInput | null> {
     const where: Prisma.EventWhereInput = {};
 
     // Filtros de texto (búsqueda y comuna): consulta SQL con `unaccent`.
@@ -37,7 +47,7 @@ export class PostgresEventRepository implements EventRepository {
     if (textQuery) {
       const rows = await this.prisma.$queryRawUnsafe<{ id: string }[]>(textQuery.text, ...textQuery.values);
       if (rows.length === 0) {
-        return [];
+        return null;
       }
       where.id = { in: rows.map((row) => row.id) };
     }
@@ -56,12 +66,42 @@ export class PostgresEventRepository implements EventRepository {
       where.startDate = { lte: toDbDate(filters.dateTo) };
     }
 
+    return where;
+  }
+
+  async findAll(filters: EventFilters = {}): Promise<EventWithRelations[]> {
+    const where = await this.buildWhere(filters);
+    if (!where) {
+      return [];
+    }
+
     const rows = await this.prisma.event.findMany({
       where,
       include: WITH_RELATIONS,
       orderBy: { id: "asc" },
     });
     return rows.map(toEventWithRelations);
+  }
+
+  async findPage(filters: EventFilters = {}, options: EventListOptions = {}): Promise<EventPage> {
+    const resolved = resolveListOptions(options);
+    const where = await this.buildWhere(filters);
+    if (!where) {
+      return buildPage([], 0, resolved);
+    }
+
+    const direction = resolved.sort === "date_desc" ? ("desc" as const) : ("asc" as const);
+    const [total, rows] = await this.prisma.$transaction([
+      this.prisma.event.count({ where }),
+      this.prisma.event.findMany({
+        where,
+        include: WITH_RELATIONS,
+        orderBy: [{ startDate: direction }, { startTime: direction }, { id: direction }],
+        skip: resolved.offset,
+        take: resolved.limit,
+      }),
+    ]);
+    return buildPage(rows.map(toEventWithRelations), total, resolved);
   }
 
   async findById(id: string): Promise<EventWithRelations | null> {
