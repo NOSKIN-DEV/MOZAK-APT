@@ -192,6 +192,8 @@ el comportamiento visible.
 
 ## 5.1 Persistencia en PostgreSQL (Etapa 11)
 
+**Estado: verificada (26-10-2026)** en el entorno del usuario: `npm run test` (77 pruebas), `npm run build`, Docker con PostgreSQL + PostGIS 3.5 y `npm run test:db` (33 pruebas) en verde.
+
 - **Esquema:** `prisma/schema.prisma` (modelos `Category`, `Venue`, `Source`,
   `Event`; tablas y columnas en snake_case). La migración inicial
   (`prisma/migrations/0001_init/migration.sql`) está escrita a mano y agrega lo
