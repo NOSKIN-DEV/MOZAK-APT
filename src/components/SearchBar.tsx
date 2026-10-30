@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_TEXT_LENGTH } from "@/lib/sanitize";
+
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -40,6 +42,7 @@ export function SearchBar({ value, onChange, size = "lg", onSubmit }: SearchBarP
           onChange={(e) => onChange(e.target.value)}
           placeholder="¿Qué quieres hacer?"
           aria-label="¿Qué quieres hacer?"
+          maxLength={MAX_TEXT_LENGTH}
           className={inputClasses}
         />
       </div>

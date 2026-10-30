@@ -1,7 +1,9 @@
 import { categories, events, sources, venues } from "@/data";
 import type { Category, Event } from "@/types";
-import type { EventFilters } from "@/lib/schemas";
-import type { EventRepository, EventWithRelations } from "./event-repository";
+import type { EventFilters, EventListOptions } from "@/lib/schemas";
+import type { EventPage, EventRepository, EventWithRelations } from "./event-repository";
+import { sortEvents } from "./event-order";
+import { buildPage, resolveListOptions } from "./pagination";
 
 function toEventWithRelations(event: Event): EventWithRelations {
   const category = categories.find((c) => c.id === event.category);
@@ -89,6 +91,16 @@ function matchesFilters(event: EventWithRelations, filters: EventFilters): boole
 export class MockEventRepository implements EventRepository {
   async findAll(filters: EventFilters = {}): Promise<EventWithRelations[]> {
     return events.map(toEventWithRelations).filter((event) => matchesFilters(event, filters));
+  }
+
+  async findPage(filters: EventFilters = {}, options: EventListOptions = {}): Promise<EventPage> {
+    const resolved = resolveListOptions(options);
+    const matching = sortEvents(
+      events.map(toEventWithRelations).filter((event) => matchesFilters(event, filters)),
+      resolved.sort,
+    );
+    const items = matching.slice(resolved.offset, resolved.offset + resolved.limit);
+    return buildPage(items, matching.length, resolved);
   }
 
   async findById(id: string): Promise<EventWithRelations | null> {

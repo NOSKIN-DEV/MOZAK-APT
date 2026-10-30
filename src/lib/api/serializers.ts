@@ -45,6 +45,16 @@ export interface ApiEvent {
   sourceUrl: string;
 }
 
+/** Bloque `meta` de GET /api/events (Etapa 13). */
+export interface ApiEventsMeta {
+  /** Total de resultados de los filtros, sumando todas las páginas. */
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  sort: "date_asc" | "date_desc";
+}
+
 export function toApiEvent(event: EventWithRelations): ApiEvent {
   return {
     id: event.id,

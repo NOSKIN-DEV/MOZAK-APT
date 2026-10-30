@@ -123,10 +123,30 @@ Filtros de `GET /api/events` (todos opcionales, se combinan con AND):
 - `isFree` — `true` o `false`
 - `dateFrom`, `dateTo` — fechas ISO (`YYYY-MM-DD`)
 
+Orden y paginación de `GET /api/events` (Etapa 13, todos opcionales):
+
+- `sort` — `date_asc` (por defecto, del evento más próximo al más lejano) o
+  `date_desc`. Ordena por fecha de inicio, luego hora de inicio y luego id.
+- `page` — número de página, desde 1 (por defecto 1).
+- `limit` — eventos por página, de 1 a 100 (por defecto 20).
+
+La respuesta es `{ data, meta }`, con `meta = { total, page, limit, totalPages, sort }`.
+`meta.total` cuenta todos los resultados de los filtros, no solo los de la
+página. Una página fuera de rango responde `200` con `data: []`.
+
+Sanitización de parámetros (Etapa 13): el texto se normaliza (Unicode NFC,
+espacios colapsados y recortados); se rechazan con `400` los caracteres de
+control (incluido el byte nulo `%00`), los textos de más de 100 caracteres, las
+comunas y categorías con símbolos de código y los parámetros repetidos. Las
+comillas, `%`, `_` y `<` en la búsqueda se tratan como texto literal: las
+consultas a la base de datos van parametrizadas.
+
 Ejemplos (pégalos en el navegador con el servidor corriendo):
 
 ```
 http://localhost:3000/api/events
+http://localhost:3000/api/events?sort=date_desc&limit=5
+http://localhost:3000/api/events?limit=5&page=5
 http://localhost:3000/api/events?search=teatro
 http://localhost:3000/api/events?category=cat-ferias&commune=Recoleta&isFree=true
 http://localhost:3000/api/events/event-001
@@ -134,8 +154,8 @@ http://localhost:3000/api/categories
 http://localhost:3000/api/communes
 ```
 
-Un query param inválido (ej. `isFree=si` o una fecha mal formada) responde
-`400` con el detalle del error; un id inexistente en `/api/events/[id]`
+Un query param inválido (ej. `isFree=si`, `limit=0` o una fecha mal formada)
+responde `400` con el detalle del error (sin repetir el valor recibido); un id inexistente en `/api/events/[id]`
 responde `404`.
 
 ## Página de detalle de evento
@@ -220,14 +240,18 @@ npm run test:watch # modo watch, útil mientras se desarrolla
 | Archivo | Qué cubre |
 |---|---|
 | `src/lib/format.test.ts` | `formatPrice` (gratis/pagado, formato CLP) y `formatEventDate` (fecha única vs. rango) |
-| `src/lib/api/parse-event-query.test.ts` | Parseo y validación de los query params de `GET /api/events` |
+| `src/lib/api/parse-event-query.test.ts` | Parseo, sanitización y validación de los query params de `GET /api/events` (filtros, `sort`, `page`, `limit`) |
 | `src/lib/repositories/event-repository.contract.ts` | Batería de **contrato** de `EventRepository` (búsqueda por texto, categoría, comuna, fecha incluyendo eventos multi-día, gratis/pagado, combinación con AND, `findById`). La ejecutan `MockEventRepository` y `PostgresEventRepository` (Etapa 11) |
 | `src/lib/repositories/mock-event-repository.test.ts` | Ejecuta el contrato contra `MockEventRepository` |
 | `src/lib/repositories/factory.test.ts` | Selección de la fuente de datos con `DATA_SOURCE` (Etapa 11) |
 | `src/lib/repositories/postgres-mapping.test.ts` | Conversión fila de base de datos ↔ dominio; las 24 filas de demostración dan el mismo resultado que el mock (Etapa 11) |
 | `src/lib/repositories/postgres-text-filters.test.ts` | Consulta SQL parametrizada de búsqueda y comuna (Etapa 11) |
 | `src/lib/repositories/postgres-event-repository.db.test.ts` | **Solo con `npm run test:db`**: el mismo contrato contra PostgreSQL real, más PostGIS y restricciones CHECK/claves foráneas (Etapa 11) |
-| `src/app/api/events/route.test.ts` | `GET /api/events`: 200 con JSON válido, filtros combinados, 400 ante parámetros inválidos |
+| `src/app/api/events/route.test.ts` | `GET /api/events`: 200 con JSON válido, filtros combinados, 400 ante parámetros inválidos; orden `sort` (MTC_00110), `page`/`limit` (MTC_00190) y entradas con caracteres especiales (MTC_00270) |
+| `src/lib/sanitize.test.ts` | Limpieza de texto: NFC, espacios, caracteres de control (byte nulo), largo máximo (Etapa 13) |
+| `src/lib/repositories/event-order.test.ts` | Orden cronológico y desempates (fecha → hora → id); `date_desc` es el inverso exacto (Etapa 13) |
+| `src/lib/repositories/pagination.test.ts` | Valores por defecto (página 1, 20 por página) y cálculo de `totalPages` (Etapa 13) |
+| `src/lib/api/build-events-query.test.ts` | Query string que arma la pantalla principal, con caracteres especiales (Etapa 13) |
 | `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento (incluye `posterImageUrl`/`videoUrl`), 404 si no existe |
 | `src/app/api/categories/route.test.ts` | `GET /api/categories`: 200 con las 9 categorías |
 | `src/app/api/communes/route.test.ts` | `GET /api/communes`: 200 con las 12 comunas, sin duplicados y ordenadas |
@@ -359,7 +383,8 @@ incluye redirección a Google Maps ni inicio de sesión de usuarios.
 - ✅ **Etapa 10** — Afiche y video del evento + documentación técnica ampliada (Sprint 3): el detalle de evento muestra el afiche de fondo y el video sobre él (nuevos campos `posterImageUrl`/`videoUrl`, validación, API, 24 afiches y 3 videos de demostración); nuevo `docs/DOCUMENTACION-TECNICA.md` (arquitectura, modelo, API, guía multimedia, solución de problemas). Se agregaron 18 pruebas. **Verificado:** `npm run test` pasa en verde (8 archivos, 59 pruebas) en el entorno del usuario; la revisión visual en el navegador queda a cargo del usuario.
 
 - ✅ **Etapa 11** — Persistencia PostgreSQL + PostGIS + Prisma (Sprint 4, HU-20): esquema Prisma, migración SQL inicial, semilla con los 24 eventos, `PostgresEventRepository` (misma batería de contrato que el mock), selección por `DATA_SOURCE` (mock por defecto), servicio `db` (`postgis/postgis:17-3.5`) y tarea `migrate` en `docker-compose.postgres.yml`. **Verificado (26-10-2026) en el entorno del usuario (Windows, Docker Desktop):** `npm install` genera el cliente de Prisma 6.19.3; `npm run test` 11 archivos / 77 pruebas en verde; `npm run build` compila con los tipos reales de Prisma; `docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build` aplica la migración, carga 24 eventos y deja la app en "Ready"; la base tiene 24 eventos y PostGIS 3.5; `npm run test:db` 33/33 en verde; revisión visual en el navegador correcta (24 eventos, 2 de Ñuñoa con `commune=nunoa`, afiche y video en el detalle). Corrección encontrada en la verificación: el healthcheck de `db` ahora usa TCP (`-h 127.0.0.1`), porque en el primer arranque la tarea `migrate` corría antes de que la base aceptara conexiones (P1001).
-- 🔄 **Etapa 12** — Actualización de seguridad de Next.js (26-10-2026): `next` y `eslint-config-next` pasan de 16.0.1 a **16.4.1**, la versión corregida de la rama 16 según el aviso oficial de Next.js del 14-10-2026 (<https://nextjs.org/blog/nextjs-security-update-october-14-2026>); la 16.0.1 además mostraba el aviso de CVE-2025-66478 al ejecutar `npm run dev`. Se conservan React 19.0.0 y el flag `--webpack`. **Pendiente de verificación en el entorno del usuario** (`npm install`, `npm run test`, `npm run build`, Docker).
+- 🔄 **Etapa 12** — Actualización de seguridad de Next.js (26-10-2026): `next` y `eslint-config-next` pasan de 16.0.1 a **16.4.1**, la versión corregida de la rama 16 según el aviso oficial de Next.js del 14-10-2026 (<https://nextjs.org/blog/nextjs-security-update-october-14-2026>); la 16.0.1 además mostraba el aviso de CVE-2025-66478 al ejecutar `npm run dev`. Se conservan React 19.0.0 y el flag `--webpack`. Se migró `eslint.config.mjs` al formato nativo de `eslint-config-next` 16 (el modo de compatibilidad `FlatCompat` fallaba con «Converting circular structure to JSON»); `npm run lint` queda en 0 errores y 3 avisos de `react-hooks/set-state-in-effect` (`page.tsx`, `eventos/[id]/page.tsx`, `ThemeToggle.tsx`), anotados como deuda técnica. En el entorno del usuario (Windows, Node 22.11.0) ya pasaron `npm install`, `npm ls next` (16.4.1), `npm run test` (11 archivos / 77 pruebas), `npm run build`, `npm run lint` y el arranque de Docker con PostgreSQL (24 eventos sembrados, Next.js 16.4.1 «Ready»). **Pendiente de verificación en el entorno del usuario:** revisión visual en el navegador y `npm audit --omit=dev`.
+- 🔄 **Etapa 13** — Orden, paginación y sanitización (Sprint 4, HU-21/HU-22/HU-23): `GET /api/events` acepta `sort` (`date_asc`/`date_desc`), `page` y `limit` (por defecto 20, máximo 100) y responde `meta = { total, page, limit, totalPages, sort }`; la pantalla principal muestra el selector «Ordenar por» y la navegación Anterior/Siguiente (12 por página). Nuevo método `findPage` en `EventRepository`, probado con la misma batería de contrato en el mock y en PostgreSQL (orden y paginación se resuelven en la base con `ORDER BY`/`OFFSET`/`LIMIT`). Sanitización de entradas (NFC, espacios, caracteres de control, largo, formato de comuna y categoría, parámetros repetidos). Cierra las brechas MTC_00110 y MTC_00190 y cubre MTC_00270. **Pendiente de verificación en el entorno del usuario.** Cambio de contrato: sin parámetros, la API ahora devuelve la primera página de 20 (antes devolvía los 24).
 
 ## Documentación de la evaluación
 

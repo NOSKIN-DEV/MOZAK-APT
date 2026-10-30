@@ -78,7 +78,7 @@ Definido en `src/types/event.ts` y validado en `src/lib/schemas.ts`.
 
 | Endpoint | Respuesta |
 |---|---|
-| `GET /api/events` | `200 { data: ApiEvent[], meta: { total } }` |
+| `GET /api/events` | `200 { data: ApiEvent[], meta: { total, page, limit, totalPages, sort } }` · `400 { error, issues }` |
 | `GET /api/events/[id]` | `200 { data: ApiEvent }` · `404 { error }` |
 | `GET /api/categories` | `200 { data: Category[] }` |
 | `GET /api/communes` | `200 { data: string[] }` (sin duplicados, orden alfabético) |
@@ -87,6 +87,42 @@ Filtros de `GET /api/events` (opcionales, combinables con AND): `search`,
 `category`, `commune`, `isFree` (`true`/`false`), `dateFrom`, `dateTo`
 (`YYYY-MM-DD`). Un valor inválido responde `400` con
 `{ error, issues: [{ path, message }] }`.
+
+**Orden y paginación (Etapa 13, HU-21/HU-22).** Parámetros opcionales:
+`sort` (`date_asc` por defecto, `date_desc`), `page` (desde 1, máximo 10 000)
+y `limit` (1 a 100, por defecto 20). El orden es por fecha de inicio, hora de
+inicio e id, así que siempre es el mismo ante empates; `date_desc` es su
+inverso exacto. `meta.total` cuenta todos los resultados de los filtros y
+`meta.totalPages = ceil(total / limit)` (0 si no hay resultados). Una página
+fuera de rango responde `200` con `data: []`. El valor por defecto de `limit`
+protege a la API cuando la base crezca con la importación de fuentes externas
+(Sprint 5): una consulta sin límite ya no devuelve todos los eventos.
+`EventRepository.findPage(filters, options)` implementa esto en ambos
+repositorios: el mock ordena y corta en memoria; PostgreSQL usa
+`ORDER BY start_date, start_time, id` con `OFFSET`/`LIMIT` y un `count` con los
+mismos filtros dentro de una transacción.
+
+**Sanitización de entradas (Etapa 13, HU-23, RNF-05, MTC_00270).** Zod valida
+la forma; `src/lib/sanitize.ts` agrega la limpieza que importa frente a una
+base de datos real:
+
+| Entrada | Tratamiento |
+|---|---|
+| Espacios, tabulaciones y saltos de línea | Se colapsan en un espacio y se recortan los extremos |
+| Unicode | Se normaliza a NFC («n» + tilde combinante = «ñ») |
+| Caracteres de control, incluido el byte nulo `%00` | `400` (PostgreSQL no puede almacenar ni comparar `\u0000`; sin esto sería un `500`) |
+| Texto de más de 100 caracteres en cualquier parámetro (además, `category` admite hasta 64 y `commune` hasta 60) | `400` |
+| `commune` / `category` con símbolos de código | `400` (comuna: letras, números, espacios, `.`, `'`, `-`; categoría: letras ASCII, números y `. _ : -`) |
+| Parámetro repetido (`?limit=5&limit=500`) | `400`, para no depender de cuál valor elija cada capa |
+| Comillas, `%`, `_`, `<`, `\` en `search` | Se aceptan como texto literal |
+| Parámetros desconocidos | Se ignoran |
+
+Los mensajes de error nunca repiten el valor recibido. Por qué no se
+«escapan» las comillas ni los `%`: la defensa contra inyección SQL son las
+consultas parametrizadas (los valores viajan aparte, como `$1`, `$2`) y la
+búsqueda usa `strpos`, que no interpreta `%` ni `_` como comodines; contra XSS
+protegen el escape de React y el `Content-Type: application/json` de la API.
+Deformar esos caracteres solo rompería búsquedas legítimas («d'Orsay»).
 
 Ejemplo de `GET /api/events/event-002`:
 
@@ -267,7 +303,11 @@ necesita. Más detalle en la sección «Docker» del README.
 - No hay `package-lock.json` versionado; las dependencias están fijadas a
   versiones exactas en `package.json`, salvo `prisma` y `@prisma/client`
   (`^6.16.0`, rango 6.x; conviene fijarlos al versionar el lockfile).
-- Brechas detectadas por el plan de pruebas: ordenamiento por fecha
-  (MTC_00110) y paginación (MTC_00190).
+- Las brechas MTC_00110 (orden por fecha) y MTC_00190 (paginación) se cerraron
+  en la Etapa 13. El orden solo ofrece fecha de inicio; otros criterios
+  (precio, cercanía con PostGIS en HU-25) quedan para historias posteriores.
+- El desempate por id usa la ordenación de texto de cada motor (JavaScript en
+  el mock, la collation de la base en PostgreSQL); con ids de la forma
+  `event-001` coinciden, y solo afecta a eventos con la misma fecha y hora.
 - Los afiches y videos son de demostración; en producción deberían servirse
   desde almacenamiento/CDN (el esquema ya acepta URLs absolutas).

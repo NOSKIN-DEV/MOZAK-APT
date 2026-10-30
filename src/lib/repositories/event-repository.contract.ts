@@ -208,4 +208,122 @@ export function defineEventRepositoryContract(createRepository: () => EventRepos
       ]);
     });
   });
+
+  // HU-21 / HU-22 (Etapa 13): orden por fecha (MTC_00110) y paginación (MTC_00190)
+  describe("findPage: orden y paginación", () => {
+    const ALL_IDS = Array.from({ length: 24 }, (_, i) => `event-${String(i + 1).padStart(3, "0")}`);
+
+    it("sin opciones: orden date_asc, página 1 y 20 resultados de un total de 24", async () => {
+      const page = await repo.findPage();
+      expect(page.items).toHaveLength(20);
+      expect(page.total).toBe(24);
+      expect(page.page).toBe(1);
+      expect(page.limit).toBe(20);
+      expect(page.totalPages).toBe(2);
+      expect(page.sort).toBe("date_asc");
+      expect(page.items.map((e) => e.id)).toEqual(ALL_IDS.slice(0, 20));
+    });
+
+    it("date_asc deja los eventos de la fecha de inicio más próxima a la más lejana", async () => {
+      const page = await repo.findPage({}, { sort: "date_asc", limit: 100 });
+      const keys = page.items.map((e) => `${e.startDate} ${e.startTime}`);
+      expect(keys).toEqual([...keys].sort());
+      expect(page.items[0]?.id).toBe("event-001");
+      expect(page.items[23]?.id).toBe("event-024");
+    });
+
+    it("date_desc es exactamente el orden inverso de date_asc", async () => {
+      const asc = await repo.findPage({}, { sort: "date_asc", limit: 100 });
+      const desc = await repo.findPage({}, { sort: "date_desc", limit: 100 });
+      expect(desc.items.map((e) => e.id)).toEqual(asc.items.map((e) => e.id).reverse());
+      expect(desc.sort).toBe("date_desc");
+    });
+
+    it("limit respeta el máximo pedido (MTC_00190: limit=20 con 24 eventos devuelve 20)", async () => {
+      const page = await repo.findPage({}, { limit: 20 });
+      expect(page.items).toHaveLength(20);
+      expect(page.total).toBe(24);
+    });
+
+    it("page y limit seleccionan el tramo correcto (página 2 de 10 = event-011 a event-020)", async () => {
+      const page = await repo.findPage({}, { page: 2, limit: 10 });
+      expect(page.items.map((e) => e.id)).toEqual(ALL_IDS.slice(10, 20));
+      expect(page.page).toBe(2);
+      expect(page.totalPages).toBe(3);
+    });
+
+    it("la última página puede traer menos resultados que limit", async () => {
+      const page = await repo.findPage({}, { page: 5, limit: 5 });
+      expect(page.items.map((e) => e.id)).toEqual(ALL_IDS.slice(20, 24));
+      expect(page.totalPages).toBe(5);
+    });
+
+    it("recorrer todas las páginas entrega cada evento una sola vez y en orden", async () => {
+      const collected: string[] = [];
+      for (let page = 1; page <= 5; page++) {
+        const result = await repo.findPage({}, { page, limit: 5, sort: "date_desc" });
+        collected.push(...result.items.map((e) => e.id));
+      }
+      expect(collected).toEqual([...ALL_IDS].reverse());
+    });
+
+    it("una página fuera de rango devuelve lista vacía pero conserva el total", async () => {
+      const page = await repo.findPage({}, { page: 99, limit: 10 });
+      expect(page.items).toEqual([]);
+      expect(page.total).toBe(24);
+      expect(page.totalPages).toBe(3);
+    });
+
+    it("el total y las páginas respetan los filtros (AND)", async () => {
+      const free = await repo.findAll({ isFree: true });
+      const page = await repo.findPage({ isFree: true }, { limit: 5 });
+      expect(page.total).toBe(free.length);
+      expect(page.totalPages).toBe(Math.ceil(free.length / 5));
+      expect(page.items.every((e) => e.isFree)).toBe(true);
+    });
+
+    it("sin resultados: lista vacía, total 0 y 0 páginas", async () => {
+      const page = await repo.findPage({ search: "zzzz-sin-coincidencias" });
+      expect(page.items).toEqual([]);
+      expect(page.total).toBe(0);
+      expect(page.totalPages).toBe(0);
+    });
+
+    it("conserva las relaciones resueltas en cada elemento de la página", async () => {
+      const page = await repo.findPage({}, { limit: 1 });
+      const first = page.items[0]!;
+      expect(first.category).toHaveProperty("name");
+      expect(first.venue).toHaveProperty("commune");
+      expect(first.source).toHaveProperty("name");
+    });
+  });
+
+  // HU-23 (Etapa 13): MTC_00270 — entradas con caracteres especiales no rompen la consulta
+  describe("textos con caracteres especiales (se tratan como texto literal)", () => {
+    const hostile = [
+      "'; DROP TABLE event; --",
+      "\" OR 1=1 --",
+      "teatro' OR '1'='1",
+      "%",
+      "_",
+      "\\",
+      "<script>alert(1)</script>",
+      "${process.env.DATABASE_URL}",
+    ];
+
+    for (const text of hostile) {
+      it(`search=${JSON.stringify(text)} no falla, no encuentra nada y no altera los datos`, async () => {
+        const page = await repo.findPage({ search: text });
+        expect(page.items).toEqual([]);
+        expect(page.total).toBe(0);
+        // Los datos siguen intactos después de la consulta.
+        expect(await repo.findAll()).toHaveLength(24);
+      });
+
+      it(`commune=${JSON.stringify(text)} no falla ni encuentra nada`, async () => {
+        const result = await repo.findAll({ commune: text });
+        expect(result).toEqual([]);
+      });
+    }
+  });
 }
