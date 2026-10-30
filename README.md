@@ -163,8 +163,10 @@ responde `404`.
 `GET /eventos/[id]` (ej. `http://localhost:3000/eventos/event-002`) muestra
 el detalle completo de un evento: categoría, título, descripción, fecha,
 horario, lugar, dirección, comuna, precio, un mapa de ubicación
-(OpenStreetMap embebido, no requiere API key) y un botón "Ver sitio
-oficial" que abre `sourceUrl` en una pestaña nueva. Si el id no existe,
+(OpenStreetMap embebido, no requiere API key), un botón "Abrir en Google
+Maps" (Etapa 14; enlace oficial sin API key, usa las coordenadas o, si no
+sirven, la dirección) y un botón "Ver sitio oficial" que abre `sourceUrl` en
+una pestaña nueva. Si el id no existe,
 muestra un mensaje claro de "Evento no encontrado" con un botón para
 volver al listado.
 
@@ -252,6 +254,7 @@ npm run test:watch # modo watch, útil mientras se desarrolla
 | `src/lib/repositories/event-order.test.ts` | Orden cronológico y desempates (fecha → hora → id); `date_desc` es el inverso exacto (Etapa 13) |
 | `src/lib/repositories/pagination.test.ts` | Valores por defecto (página 1, 20 por página) y cálculo de `totalPages` (Etapa 13) |
 | `src/lib/api/build-events-query.test.ts` | Query string que arma la pantalla principal, con caracteres especiales (Etapa 13) |
+| `src/lib/maps.test.ts` | Enlace a Google Maps: coordenadas válidas/inválidas, respaldo por dirección, tildes, ñ y símbolos reservados codificados, sin inyección de parámetros, `null` sin datos (Etapa 14) |
 | `src/app/api/events/[id]/route.test.ts` | `GET /api/events/[id]`: 200 con el evento (incluye `posterImageUrl`/`videoUrl`), 404 si no existe |
 | `src/app/api/categories/route.test.ts` | `GET /api/categories`: 200 con las 9 categorías |
 | `src/app/api/communes/route.test.ts` | `GET /api/communes`: 200 con las 12 comunas, sin duplicados y ordenadas |
@@ -366,8 +369,8 @@ Qué hace cada pieza:
 
 **Alcance de esta etapa:** la extensión PostGIS queda habilitada, pero la
 columna geográfica de `venue` (para la búsqueda por proximidad, HU-25) se agrega
-en esa historia. Esta etapa **no** cambia el mapa de la página de detalle, no
-incluye redirección a Google Maps ni inicio de sesión de usuarios.
+en esa historia. Esta etapa **no** cambia el mapa de la página de detalle ni incluye inicio de
+sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 
 ## Estado del prototipo
 
@@ -385,6 +388,7 @@ incluye redirección a Google Maps ni inicio de sesión de usuarios.
 - ✅ **Etapa 11** — Persistencia PostgreSQL + PostGIS + Prisma (Sprint 4, HU-20): esquema Prisma, migración SQL inicial, semilla con los 24 eventos, `PostgresEventRepository` (misma batería de contrato que el mock), selección por `DATA_SOURCE` (mock por defecto), servicio `db` (`postgis/postgis:17-3.5`) y tarea `migrate` en `docker-compose.postgres.yml`. **Verificado (26-10-2026) en el entorno del usuario (Windows, Docker Desktop):** `npm install` genera el cliente de Prisma 6.19.3; `npm run test` 11 archivos / 77 pruebas en verde; `npm run build` compila con los tipos reales de Prisma; `docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build` aplica la migración, carga 24 eventos y deja la app en "Ready"; la base tiene 24 eventos y PostGIS 3.5; `npm run test:db` 33/33 en verde; revisión visual en el navegador correcta (24 eventos, 2 de Ñuñoa con `commune=nunoa`, afiche y video en el detalle). Corrección encontrada en la verificación: el healthcheck de `db` ahora usa TCP (`-h 127.0.0.1`), porque en el primer arranque la tarea `migrate` corría antes de que la base aceptara conexiones (P1001).
 - ✅ **Etapa 12** — Actualización de seguridad de Next.js (26-10-2026; verificada el 30-10-2026): `next` y `eslint-config-next` pasan de 16.0.1 a **16.4.1**, la versión corregida de la rama 16 según el aviso oficial de Next.js del 14-10-2026 (<https://nextjs.org/blog/nextjs-security-update-october-14-2026>); la 16.0.1 además mostraba el aviso de CVE-2025-66478 al ejecutar `npm run dev`. Se conservan React 19.0.0 y el flag `--webpack`. Se migró `eslint.config.mjs` al formato nativo de `eslint-config-next` 16 (el modo de compatibilidad `FlatCompat` fallaba con «Converting circular structure to JSON»); `npm run lint` queda en 0 errores y 3 avisos de `react-hooks/set-state-in-effect` (`page.tsx`, `eventos/[id]/page.tsx`, `ThemeToggle.tsx`), anotados como deuda técnica. Verificada el 30-10-2026 en el entorno del usuario (Windows, Docker Desktop, Node 22.11.0), sobre la rama integrada con la Etapa 13: `npm install`, `npm ls next` (16.4.1), `npm run lint` (0 errores, 3 avisos), `npm run test` (15 archivos / 181 pruebas), `npm run build` y Docker con PostgreSQL (24 eventos sembrados, Next.js 16.4.1 «Ready») en verde. `npm audit --omit=dev` informa 4 vulnerabilidades altas que no afectan a la app en ejecución: `deepmerge-ts` llega por la herramienta de línea de comandos de Prisma (solo el contenedor de migración; la imagen de la app no la incluye) y `zod` (aviso sobre esquemas de arreglos sin límite de largo; el código no usa arreglos). Queda pendiente actualizar `zod` a 4.6.7 o superior con sus pruebas; no se usa `npm audit fix --force`, que bajaría Prisma a 6.12.0.
 - ✅ **Etapa 13** — Orden, paginación y sanitización (Sprint 4, HU-21/HU-22/HU-23; verificada el 30-10-2026): `GET /api/events` acepta `sort` (`date_asc`/`date_desc`), `page` y `limit` (por defecto 20, máximo 100) y responde `meta = { total, page, limit, totalPages, sort }`; la pantalla principal muestra el selector «Ordenar por» y la navegación Anterior/Siguiente (12 por página). Nuevo método `findPage` en `EventRepository`, probado con la misma batería de contrato en el mock y en PostgreSQL (orden y paginación se resuelven en la base con `ORDER BY`/`OFFSET`/`LIMIT`). Sanitización de entradas (NFC, espacios, caracteres de control, largo, formato de comuna y categoría, parámetros repetidos). Cierra las brechas MTC_00110 y MTC_00190 y cubre MTC_00270. **Verificada el 30-10-2026 en el entorno del usuario:** `npm run test` 15 archivos / 181 pruebas, `npm run test:db` 60/60 contra PostgreSQL real, y revisión en el navegador (selector «Ordenar por», paginación, filtros, detalle y respuestas 200/400 de `/api/events`). Cambio de contrato: sin parámetros, la API ahora devuelve la primera página de 20 (antes devolvía los 24).
+- 🔄 **Etapa 14** — Botón «Abrir en Google Maps» (Sprint 4, HU-28 / MA-47; **pendiente de verificación** en el equipo del usuario): en el detalle del evento se agrega un enlace oficial de Maps URLs (`https://www.google.com/maps/search/?api=1&query=...`, sin API key ni facturación) que se abre en una pestaña nueva. Usa las coordenadas del lugar; si no son utilizables (fuera de rango, no numéricas o el punto 0,0) usa «dirección, comuna, Chile» codificada; si no hay ninguna, el botón no se muestra. El mapa embebido de OpenStreetMap se **conserva** (un mapa de Google incrustado exige clave de API y cuenta de facturación). Lógica pura y probada en `src/lib/maps.ts`.
 
 ## Documentación de la evaluación
 

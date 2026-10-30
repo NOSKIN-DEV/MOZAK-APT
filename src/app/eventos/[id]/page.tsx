@@ -157,6 +157,8 @@ export default function EventDetailPage() {
                   latitude={event.venue.latitude}
                   longitude={event.venue.longitude}
                   label={event.venue.name}
+                  address={event.venue.address}
+                  commune={event.venue.commune}
                 />
               </div>
 

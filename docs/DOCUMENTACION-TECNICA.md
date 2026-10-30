@@ -261,6 +261,36 @@ el comportamiento visible.
 - **ESLint:** `eslint.config.mjs` usa el formato nativo de `eslint-config-next` 16 (`eslint-config-next/core-web-vitals` y `/typescript`). El modo `FlatCompat` heredado fallaba con «Converting circular structure to JSON». Los 3 avisos corresponden a pantallas que cargan datos al inicio de un efecto; se dejaron como aviso y la refactorización queda como deuda técnica.
 - **`npm audit --omit=dev`:** 4 vulnerabilidades altas. `deepmerge-ts` llega por la herramienta de línea de comandos de Prisma (solo el contenedor de migración) y `zod` tiene un aviso sobre esquemas de arreglos sin límite de largo (la app no los usa). Pendiente: subir `zod` a 4.6.7 o superior con pruebas. No usar `npm audit fix --force`.
 
+## 5.3 Enlace a Google Maps (Etapa 14, HU-28 / MA-47)
+
+**Estado: pendiente de verificación** en el equipo del usuario (las pruebas
+nuevas están escritas, pero no se declaran verificadas hasta que se ejecuten).
+
+En el detalle del evento, junto al mapa embebido de OpenStreetMap, hay un botón
+«Abrir en Google Maps» que abre una pestaña nueva con el lugar. Se usa el formato
+oficial de *Maps URLs*, que **no requiere clave de API ni facturación**:
+
+```
+https://www.google.com/maps/search/?api=1&query=<lat>,<lng>
+https://www.google.com/maps/search/?api=1&query=<dirección, comuna, Chile codificada>
+```
+
+Reglas (`src/lib/maps.ts`, función pura `buildGoogleMapsUrl`):
+
+1. Coordenadas utilizables → `query=<lat>,<lng>` (hasta 6 decimales, sin notación
+   científica). No son utilizables si no son números finitos, si están fuera de
+   rango o si son exactamente (0, 0), valor que dejan las fuentes con la ubicación vacía.
+2. Si no, la dirección: «dirección, comuna, Chile» pasa por `encodeURIComponent`
+   (tildes, ñ, `#`, `&`, `?`, `/`, `%`), se eliminan caracteres de control y espacios
+   repetidos, y la dirección no puede agregar parámetros a la URL.
+3. Si no hay ni coordenadas ni dirección, devuelve `null` y la pantalla no muestra el botón.
+
+**Decisión sobre el mapa embebido:** se conserva el de OpenStreetMap. Un mapa de
+Google incrustado requiere una clave de Maps Embed API asociada a una cuenta de
+facturación, lo que no corresponde a un prototipo de costo cero.
+
+Pruebas: `src/lib/maps.test.ts` (parte de `npm run test`).
+
 ## 6. Docker
 
 `docker compose up --build` construye una imagen multi-stage
@@ -302,6 +332,9 @@ necesita. Más detalle en la sección «Docker» del README.
 | Puerto 5432 ocupado | Define `DB_PORT=5433` y ajusta el puerto en `DATABASE_URL` |
 
 ## 9. Limitaciones conocidas y trabajo futuro
+
+- El botón de Google Maps (Etapa 14) abre un enlace externo; no hay mapa interactivo
+  propio ni cálculo de rutas dentro de la aplicación.
 
 - El modo por defecto sigue siendo `mock`; dejar de usar datos mock en la
   aplicación real (HU-29) y cargar eventos reales (ETL) son historias
