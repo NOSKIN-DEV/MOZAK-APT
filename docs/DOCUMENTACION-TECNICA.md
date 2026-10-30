@@ -254,6 +254,13 @@ el comportamiento visible.
 - **Comandos:** `npm run db:migrate`, `npm run db:seed`, `npm run test:db`
   (ver «PostgreSQL» en el README).
 
+## 5.2 Next.js 16.4.1, orden, paginación y sanitización (Etapas 12 y 13)
+
+**Estado: verificadas (30-10-2026)** en el entorno del usuario (Windows, Docker Desktop, Node 22.11.0), sobre la rama integrada: `npm ls next` (16.4.1), `npm run lint` (0 errores, 3 avisos `react-hooks/set-state-in-effect`), `npm run test` (15 archivos, 181 pruebas), `npm run test:db` (60 pruebas), `npm run build`, Docker con PostgreSQL (24 eventos, Next.js 16.4.1) y revisión en el navegador.
+
+- **ESLint:** `eslint.config.mjs` usa el formato nativo de `eslint-config-next` 16 (`eslint-config-next/core-web-vitals` y `/typescript`). El modo `FlatCompat` heredado fallaba con «Converting circular structure to JSON». Los 3 avisos corresponden a pantallas que cargan datos al inicio de un efecto; se dejaron como aviso y la refactorización queda como deuda técnica.
+- **`npm audit --omit=dev`:** 4 vulnerabilidades altas. `deepmerge-ts` llega por la herramienta de línea de comandos de Prisma (solo el contenedor de migración) y `zod` tiene un aviso sobre esquemas de arreglos sin límite de largo (la app no los usa). Pendiente: subir `zod` a 4.6.7 o superior con pruebas. No usar `npm audit fix --force`.
+
 ## 6. Docker
 
 `docker compose up --build` construye una imagen multi-stage
