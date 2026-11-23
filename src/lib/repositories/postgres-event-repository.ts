@@ -24,6 +24,9 @@ const WITH_RELATIONS = { category: true, venue: true, source: true } as const;
  *    se solapa con la ventana pedida.
  *  - Todos los filtros se combinan con AND.
  *
+ * Etapa 15: todas las consultas se limitan a los eventos PUBLISHED; los
+ * borradores, los eventos en revisión y los rechazados no salen por aquí.
+ *
  * Orden: findAll() ordena por id (igual que el arreglo mock). findPage()
  * (Etapa 13) ordena por fecha de inicio, hora de inicio e id, y pagina en la
  * base de datos con skip/take; el total sale de un count con los mismos
@@ -40,7 +43,8 @@ export class PostgresEventRepository implements EventRepository {
    * filtros de texto no coinciden con ningún evento (no hace falta consultar más).
    */
   private async buildWhere(filters: EventFilters): Promise<Prisma.EventWhereInput | null> {
-    const where: Prisma.EventWhereInput = {};
+    // Etapa 15: la API pública solo muestra los eventos PUBLISHED (aprobados por un administrador).
+    const where: Prisma.EventWhereInput = { status: "PUBLISHED" };
 
     // Filtros de texto (búsqueda y comuna): consulta SQL con `unaccent`.
     const textQuery = buildTextFilterQuery(filters);
@@ -105,7 +109,7 @@ export class PostgresEventRepository implements EventRepository {
   }
 
   async findById(id: string): Promise<EventWithRelations | null> {
-    const row = await this.prisma.event.findUnique({ where: { id }, include: WITH_RELATIONS });
+    const row = await this.prisma.event.findFirst({ where: { id, status: "PUBLISHED" }, include: WITH_RELATIONS });
     return row ? toEventWithRelations(row) : null;
   }
 
@@ -115,7 +119,12 @@ export class PostgresEventRepository implements EventRepository {
   }
 
   async findAllCommunes(): Promise<string[]> {
-    const rows = await this.prisma.venue.findMany({ distinct: ["commune"], select: { commune: true } });
+    // Solo comunas con al menos un evento publicado (un recinto nuevo de un borrador no cuenta).
+    const rows = await this.prisma.venue.findMany({
+      where: { events: { some: { status: "PUBLISHED" } } },
+      distinct: ["commune"],
+      select: { commune: true },
+    });
     // Se ordena en JS con el criterio del español (Ñuñoa después de Maipú) para
     // no depender de la collation de la base de datos.
     return rows.map((row) => row.commune).sort((a, b) => a.localeCompare(b, "es"));

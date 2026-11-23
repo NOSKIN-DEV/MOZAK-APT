@@ -11,8 +11,15 @@
 // La columna `location geography(Point, 4326)` de `venue` se agrega junto con
 // la historia de búsqueda por proximidad (HU-25), no en esta etapa.
 //
-// La migración se escribe a mano (prisma/migrations/0001_init/migration.sql) y
-// se aplica con `prisma migrate deploy`.
+// Las migraciones se escriben a mano (prisma/migrations/*/migration.sql) y se
+// aplican con `prisma migrate deploy`.
+//
+// Etapa 15 (migración 0002_roles_moderacion): usuarios con rol (ADMIN/CREATOR),
+// estado de publicación de cada evento y auditoría de las decisiones de
+// moderación. El consumidor NO tiene cuenta: solo existen administradores y
+// creadores. Lo que Prisma no modela y vive solo en el SQL de la migración: las
+// restricciones CHECK (correo en minúsculas, un evento de creador no puede estar
+// publicado sin fecha de revisión, una aprobación exige la lista confirmada).
 
 generator client {
   provider = "prisma-client-js"
@@ -21,6 +28,75 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CREATOR
+
+  @@map("user_role")
+}
+
+/// Ciclo de vida de un evento. Solo PUBLISHED es visible en la API pública.
+enum EventStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+
+  @@map("event_status")
+}
+
+enum ReviewDecision {
+  APPROVED
+  REJECTED
+  UNPUBLISHED
+
+  @@map("review_decision")
+}
+
+/// Administrador o creador. La tabla se llama app_user porque "user" es palabra reservada en PostgreSQL.
+model User {
+  id           String    @id
+  /// Siempre en minúsculas (restricción CHECK en la migración).
+  email        String    @unique
+  name         String
+  /// Hash scrypt de la contraseña (nunca la contraseña). Ver src/lib/auth/password.ts.
+  passwordHash String    @map("password_hash")
+  role         UserRole
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(3)
+
+  events  Event[]
+  reviews ModerationReview[]
+
+  @@map("app_user")
+}
+
+/// Decisión de un administrador sobre un evento (auditoría). Solo se agregan filas, no se editan.
+model ModerationReview {
+  id                 String         @id
+  eventId            String         @map("event_id")
+  reviewerId         String         @map("reviewer_id")
+  decision           ReviewDecision
+  /// Motivo (ADULT_CONTENT, DRUGS, BLACK_MARKET, OTHER_NORM, INCOMPLETE_INFO); null al aprobar.
+  reasonCategory     String?        @map("reason_category")
+  note               String?
+  /// Categorías que marcó el cribado automático al momento de decidir.
+  flaggedCategories  String[]       @default([]) @map("flagged_categories")
+  /// true si el administrador confirmó la lista de condiciones de la norma.
+  checklistConfirmed Boolean        @map("checklist_confirmed")
+  policyVersion      String         @map("policy_version")
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reviewer User  @relation(fields: [reviewerId], references: [id])
+
+  @@index([eventId], map: "moderation_review_event_idx")
+  @@index([reviewerId], map: "moderation_review_reviewer_idx")
+  @@map("moderation_review")
 }
 
 model Category {
@@ -80,13 +156,30 @@ model Event {
   sourceId       String   @map("source_id")
   venueId        String   @map("venue_id")
 
-  category Category @relation(fields: [categoryId], references: [id])
-  source   Source   @relation(fields: [sourceId], references: [id])
-  venue    Venue    @relation(fields: [venueId], references: [id])
+  /// Etapa 15. Por seguridad, un evento nuevo NO nace publicado: la semilla y la
+  /// aprobación de un administrador son las únicas vías a PUBLISHED. Los eventos
+  /// que ya existían al migrar quedaron PUBLISHED (ver 0002_roles_moderacion).
+  status                  EventStatus @default(DRAFT)
+  /// Creador del evento; null en los eventos de demostración cargados por la semilla.
+  createdById             String?     @map("created_by_id")
+  submittedAt             DateTime?   @map("submitted_at") @db.Timestamptz(3)
+  reviewedAt              DateTime?   @map("reviewed_at") @db.Timestamptz(3)
+  /// Cuándo el creador declaró que el evento cumple la política de contenido.
+  contentPolicyAcceptedAt DateTime?   @map("content_policy_accepted_at") @db.Timestamptz(3)
+  createdAt               DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  category Category           @relation(fields: [categoryId], references: [id])
+  source   Source             @relation(fields: [sourceId], references: [id])
+  venue    Venue              @relation(fields: [venueId], references: [id])
+  createdBy User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  reviews  ModerationReview[]
 
   @@index([categoryId], map: "event_category_idx")
   @@index([venueId], map: "event_venue_idx")
   @@index([sourceId], map: "event_source_idx")
   @@index([startDate, endDate], map: "event_dates_idx")
+  @@index([status], map: "event_status_idx")
+  @@index([createdById], map: "event_created_by_idx")
   @@map("event")
 }
