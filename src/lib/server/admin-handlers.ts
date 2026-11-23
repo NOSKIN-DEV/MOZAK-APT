@@ -1,5 +1,5 @@
 import { toPublicUser } from "@/lib/auth/auth-service";
-import { MODERATION_CHECKLIST, REJECTION_REASONS } from "@/lib/moderation/content-policy";
+import { MODERATION_CHECKLIST, REJECTION_REASONS, contentCategoryLabel } from "@/lib/moderation/content-policy";
 import { WorkflowError } from "@/lib/moderation/errors";
 import { EVENT_STATUSES, type EventStatus } from "@/types";
 import { protectedAction } from "./guard";
@@ -40,7 +40,8 @@ export function createAdminHandlers(services: Services) {
         const { event, flags, reviews } = await workflow.getForReview(user, id);
         return json({
           data: toApiManagedEvent(event, "admin"),
-          flags,
+          // Alertas del cribado automático (orientativas), con el nombre legible de la categoría.
+          flags: flags.map((flag) => ({ ...flag, label: contentCategoryLabel(flag.category) })),
           reviews: reviews.map((review) => toApiReview(review, "admin")),
         });
       }),

@@ -76,6 +76,10 @@ Con `DATA_SOURCE=mock` (valor por defecto) no se requiere base de datos.
 Para usar PostgreSQL (`DATA_SOURCE=postgres`) hace falta además
 `DATABASE_URL`; ver la sección «PostgreSQL (Etapa 11)».
 
+Para los paneles de creador y administrador (Etapa 15) existen además
+`SESSION_SECRET`, `ENABLE_DEMO_USERS`, `DEMO_USERS_PASSWORD` y `SEED_*`
+(ver `.env.example` y «Perfiles y moderación (Etapa 15)»).
+
 ## Estructura del proyecto
 
 ```
@@ -114,6 +118,10 @@ Con el servidor corriendo (`npm run dev`), la API queda disponible en:
 | `GET /api/events/[id]`   | Detalle de un evento. 404 si no existe.                         |
 | `GET /api/categories`    | Lista de categorías disponibles.                                |
 | `GET /api/communes`      | Lista de comunas disponibles (derivadas de los venues).         |
+
+Estos endpoints públicos solo devuelven eventos **publicados** (Etapa 15). Los
+endpoints de los perfiles de creador y administrador (`/api/auth/*`,
+`/api/creator/*`, `/api/admin/*`) están en `docs/ROLES-Y-MODERACION.md`.
 
 Filtros de `GET /api/events` (todos opcionales, se combinan con AND):
 
@@ -372,6 +380,18 @@ columna geográfica de `venue` (para la búsqueda por proximidad, HU-25) se agre
 en esa historia. Esta etapa **no** cambia el mapa de la página de detalle ni incluye inicio de
 sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 
+## Perfiles y moderación (Etapa 15)
+
+El público general **no tiene cuenta**: consulta los eventos publicados en `/`.
+Quienes publican usan `/ingresar`:
+
+- **Creador** (`/creador`): crea borradores, los envía a revisión (declarando que cumplen la política de contenido) y ve el estado y los motivos de rechazo.
+- **Administrador** (`/admin`): revisa la cola, aprueba o rechaza, retira publicaciones y crea/activa/desactiva cuentas de creador.
+
+**No se permiten** eventos con desnudos o actos sexuales, drogas o tráfico de drogas, ni mercado negro. Para aprobar, el administrador debe confirmar esas tres condiciones; la revisión automática de palabras clave solo orienta y puede equivocarse.
+
+Cuentas de demostración (solo uso local): `admin@mozak.demo` y `organizador@mozak.demo`, contraseña `mozak-demo-2026` (o `DEMO_USERS_PASSWORD`). Con `DATA_SOURCE=mock` los datos creados se pierden al reiniciar. Con PostgreSQL, el administrador real se crea con `SEED_ADMIN_EMAIL` y `SEED_ADMIN_PASSWORD` al ejecutar `npm run db:seed`. **No actives las cuentas de demostración en un servidor accesible desde Internet.** Documentación completa: `docs/ROLES-Y-MODERACION.md`.
+
 ## Estado del prototipo
 
 - ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
@@ -390,6 +410,8 @@ sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 - ✅ **Etapa 13** — Orden, paginación y sanitización (Sprint 4, HU-21/HU-22/HU-23; verificada el 30-10-2026): `GET /api/events` acepta `sort` (`date_asc`/`date_desc`), `page` y `limit` (por defecto 20, máximo 100) y responde `meta = { total, page, limit, totalPages, sort }`; la pantalla principal muestra el selector «Ordenar por» y la navegación Anterior/Siguiente (12 por página). Nuevo método `findPage` en `EventRepository`, probado con la misma batería de contrato en el mock y en PostgreSQL (orden y paginación se resuelven en la base con `ORDER BY`/`OFFSET`/`LIMIT`). Sanitización de entradas (NFC, espacios, caracteres de control, largo, formato de comuna y categoría, parámetros repetidos). Cierra las brechas MTC_00110 y MTC_00190 y cubre MTC_00270. **Verificada el 30-10-2026 en el entorno del usuario:** `npm run test` 15 archivos / 181 pruebas, `npm run test:db` 60/60 contra PostgreSQL real, y revisión en el navegador (selector «Ordenar por», paginación, filtros, detalle y respuestas 200/400 de `/api/events`). Cambio de contrato: sin parámetros, la API ahora devuelve la primera página de 20 (antes devolvía los 24).
 - ✅ **Etapa 14** — Botón «Abrir en Google Maps» y servidor de prueba sin costo (Sprint 4, HU-28 / MA-47). **Verificado el 30-10-2026 en el equipo del usuario:** `npm run lint` (0 errores, 3 avisos), `npm run test` (16 archivos, 205 pruebas) y `npm run build`. **Verificación visual el 19-11-2026 en el equipo del usuario:** en el detalle de «Festival de teatro callejero» el botón abre Google Maps en −33,5167; −70,6000, las coordenadas de «Centro Deportivo Demo La Florida». **Pendiente:** el despliegue en Neon + Vercel (`docs/DESPLIEGUE.md`, escrito pero aún sin ejecutar). Botón: en el detalle del evento se agrega un enlace oficial de Maps URLs (`https://www.google.com/maps/search/?api=1&query=...`, sin API key ni facturación) que se abre en una pestaña nueva. Usa las coordenadas del lugar; si no son utilizables (fuera de rango, no numéricas o el punto 0,0) usa «dirección, comuna, Chile» codificada; si no hay ninguna, el botón no se muestra. El mapa embebido de OpenStreetMap se **conserva** (un mapa de Google incrustado exige clave de API y cuenta de facturación). Lógica pura y probada en `src/lib/maps.ts`.
 
+- 🟡 **Etapa 15** — Perfiles de administrador y creador, y moderación de eventos (rama `feature/roles-moderacion`; **pendiente de verificación en el equipo del proyecto**). El consumidor sigue sin cuenta. Los eventos nacen como borrador, el creador los envía a revisión y **solo un administrador puede publicarlos**, confirmando tres condiciones de la norma (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro). La API pública solo muestra eventos publicados. Incluye: migración `0002_roles_moderacion` (usuarios, estado del evento, historial de decisiones), autenticación con sesión firmada, API `/api/auth`, `/api/creator` y `/api/admin`, pantallas `/ingresar`, `/creador` y `/admin`, y revisión automática de palabras clave **solo orientativa**. **Probado en un entorno de apoyo sin npm** (arnés propio de pruebas con 287 pruebas del repositorio en verde y chequeo de tipos del código nuevo); **no ejecutado todavía:** `npm run lint`, `npm run test` con Vitest, `npm run build`, la migración y `npm run test:db` contra PostgreSQL real, ni las pantallas en un navegador. Detalle, límites y pasos de verificación: `docs/ROLES-Y-MODERACION.md`.
+
 ## Documentación de la evaluación
 
 Además de este README, el proyecto cuenta con un documento maestro vivo (Claude Docs) que se mantiene actualizado clase a clase: **Documentación del Proyecto — MOZAK (APT)**, con las pestañas:
@@ -406,5 +428,5 @@ Además de este README, el proyecto cuenta con un documento maestro vivo (Claude
 ## Próximas funcionalidades (no incluidas todavía)
 
 - Fuentes externas reales (ETL), fin del uso de datos mock en producción,
-  búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones, panel
-  administrativo, versión Android vía Capacitor.
+  búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones,
+  cambio y recuperación de contraseña, subida de imágenes, versión Android vía Capacitor.

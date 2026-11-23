@@ -25,6 +25,9 @@ export function Header({ searchValue, onSearchChange, onSearchSubmit }: HeaderPr
                 Inicio
               </Link>
             </nav>
+            <Link href="/ingresar" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50">
+              Organizadores
+            </Link>
             <ThemeToggle />
           </div>
         </div>
@@ -35,6 +38,9 @@ export function Header({ searchValue, onSearchChange, onSearchSubmit }: HeaderPr
               Inicio
             </Link>
           </nav>
+          <Link href="/ingresar" className="hidden shrink-0 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50 sm:block">
+            Organizadores
+          </Link>
           <div className="w-full sm:max-w-xs">
             <SearchBar size="sm" value={searchValue} onChange={onSearchChange} onSubmit={onSearchSubmit} />
           </div>

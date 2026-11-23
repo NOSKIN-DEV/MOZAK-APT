@@ -1,3 +1,4 @@
+import { CONTENT_CATEGORIES, CONTENT_POLICY_VERSION } from "@/lib/moderation/content-policy";
 import { protectedAction } from "./guard";
 import { json } from "./http";
 import { toApiManagedEvent, toApiReview } from "./serializers";
@@ -14,8 +15,17 @@ export function createCreatorHandlers(services: Services) {
   const action = { role: "CREATOR", mutating: true } as const;
 
   return {
+    /** Categorías y recintos para el formulario, más la política de contenido que el creador declara cumplir. */
     catalog: (request: Request) =>
-      protectedAction(request, services, read, async (user) => json({ data: await workflow.catalog(user) })),
+      protectedAction(request, services, read, async (user) =>
+        json({
+          data: await workflow.catalog(user),
+          policy: {
+            version: CONTENT_POLICY_VERSION,
+            prohibited: CONTENT_CATEGORIES.map(({ id, label, description }) => ({ id, label, description })),
+          },
+        }),
+      ),
 
     list: (request: Request) =>
       protectedAction(request, services, read, async (user) => {

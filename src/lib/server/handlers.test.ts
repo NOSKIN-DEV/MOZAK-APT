@@ -246,7 +246,7 @@ describe("flujo completo por HTTP: crear → enviar → aprobar → publicar", (
     await creator.submit(request("POST", "/x", { cookie: creatorCookie, body: { acceptsContentPolicy: true } }), draft.id);
 
     const detail = await bodyOf(await admin.getEvent(request("GET", "/x", { cookie: adminCookie }), draft.id));
-    expect(detail.flags).toEqual([{ category: "ADULT_CONTENT", term: "desnudos" }]);
+    expect(detail.flags).toEqual([{ category: "ADULT_CONTENT", term: "desnudos", label: "Contenido adulto" }]);
 
     const rejected = await admin.reject(request("POST", "/x", { cookie: adminCookie, body: { reason: "ADULT_CONTENT", note: "No se permiten desnudos ni actos sexuales." } }), draft.id);
     expect(rejected.status).toBe(200);
