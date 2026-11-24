@@ -95,6 +95,7 @@ La Etapa 12 (actualización de seguridad de Next.js 16.4.1 y migración de ESLin
 | 19-11-2026 | HU-29 pasa del Sprint 4 al Sprint 5 | Depende de la ingesta de fuentes externas (HU-24) |
 | 19-11-2026 | HU-28 cerrada tras su verificación visual | Etapa 14 verificada |
 | 23-11-2026 | Se agrega HU-30 (perfiles de creador y administrador, moderación) al Sprint 5 | Pedido del usuario: el consumidor sigue sin cuenta; solo el administrador publica. Cambia el alcance acordado «sin inicio de sesión ni roles» |
+| 24-11-2026 | Se registra la tarea MA-54 (cerrar brechas de documentación de la evaluación) en el Sprint 5, sin puntos | Pedido del usuario; no es una historia de producto, por eso no cambia el total de puntos |
 
 ## Fuera de alcance por ahora
 
