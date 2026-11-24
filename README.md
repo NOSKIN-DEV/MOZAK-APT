@@ -85,25 +85,29 @@ Para los paneles de creador y administrador (Etapa 15) existen además
 ```
 src/
   app/
-    api/             API interna (Etapa 3): events, events/[id], categories, communes
+    api/             API interna: events, events/[id], categories, communes (Etapa 3); auth, creator, admin (Etapa 15)
     page.tsx           Página principal (Etapa 4/5): header, hero, filtros y listado
     eventos/[id]/      Página de detalle de evento (Etapa 6)
-  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle
+    ingresar/, creador/, admin/   Inicio de sesión y paneles de creador y administrador (Etapa 15)
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle; panel/ (paneles de la Etapa 15)
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository + PostgresEventRepository + fábrica por DATA_SOURCE
     db/                Cliente de Prisma compartido (solo se carga con DATA_SOURCE=postgres)
     api/               Serialización de eventos y parseo de query params para la API
     format.ts          Formato de precio (CLP) y fechas en español
+    moderation/        Ciclo de vida del evento, política de contenido y errores (Etapa 15)
+    auth/              Contraseñas, sesión firmada y bloqueo de intentos (Etapa 15)
+    server/            Manejadores de las rutas y composición de servicios (Etapa 15)
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
 prisma/
-  schema.prisma        Modelos de la base (Category, Venue, Source, Event)
-  migrations/          Migración SQL inicial (extensiones, tablas, restricciones CHECK, índices)
+  schema.prisma        Modelos de la base (Category, Venue, Source, Event, AppUser, ModerationReview)
+  migrations/          0001_init (extensiones, tablas, restricciones CHECK, índices) y 0002_roles_moderacion (Etapa 15)
   seed.ts              Carga los 24 eventos de demostración en PostgreSQL (npm run db:seed)
 public/
   media/           Afiches (posters/) y videos (videos/) de los eventos (Etapa 10)
-docs/            Documentación técnica ampliada (Etapa 10)
+docs/            Documentación del proyecto (índice en docs/README.md)
 scripts/
   check-mock-data.ts   Valida los datos mock y prueba el repositorio (npm run check:data)
 ```
@@ -412,18 +416,23 @@ Cuentas de demostración (solo uso local): `admin@mozak.demo` y `organizador@moz
 
 - 🟡 **Etapa 15** — Perfiles de administrador y creador, y moderación de eventos (rama `feature/roles-moderacion`; **pendiente de verificación en el equipo del proyecto**). El consumidor sigue sin cuenta. Los eventos nacen como borrador, el creador los envía a revisión y **solo un administrador puede publicarlos**, confirmando tres condiciones de la norma (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro). La API pública solo muestra eventos publicados. Incluye: migración `0002_roles_moderacion` (usuarios, estado del evento, historial de decisiones), autenticación con sesión firmada, API `/api/auth`, `/api/creator` y `/api/admin`, pantallas `/ingresar`, `/creador` y `/admin`, y revisión automática de palabras clave **solo orientativa**. **Probado en un entorno de apoyo sin npm** (arnés propio de pruebas con 287 pruebas del repositorio en verde y chequeo de tipos del código nuevo); **no ejecutado todavía:** `npm run lint`, `npm run test` con Vitest, `npm run build`, la migración y `npm run test:db` contra PostgreSQL real, ni las pantallas en un navegador. Detalle, límites y pasos de verificación: `docs/ROLES-Y-MODERACION.md`.
 
+## Integrantes y roles
+
+> **Pendiente de completar por el equipo.** Este repositorio es público: se agregan nombres y roles solo cuando cada integrante los confirme.
+
+| Integrante | Rol | Responsabilidades |
+|---|---|---|
+| *(completar)* | *(completar)* | *(completar)* |
+
 ## Documentación de la evaluación
 
-Además de este README, el proyecto cuenta con un documento maestro vivo (Claude Docs) que se mantiene actualizado clase a clase: **Documentación del Proyecto — MOZAK (APT)**, con las pestañas:
+La documentación del proyecto está en la carpeta [`docs/`](docs/README.md) (índice con el estado de cada documento):
 
-- **Resumen** — índice del documento.
-- **Planificación (Scrum)** — Product Backlog y Sprint Backlog, correlacionados con el plan de pruebas oficial del curso (32 casos MTC).
-- **Plan de Pruebas** — estrategia, tipos de prueba, metodología y herramientas de testing.
-- **Especificaciones Técnicas** — requisitos funcionales/no funcionales, stack tecnológico, historias de usuario.
-- **Modelo de Datos** — diagrama entidad-relación, modelo lógico y modelo físico (PostgreSQL + PostGIS).
-- **Arquitectura del Sistema** — diagrama de componentes, diagrama de casos de uso (UML), diagrama de proceso (BPM) y plan de dockerización.
+- **Gestión:** inicio de proyecto, metodología (Scrum), visión del producto, Product Backlog, Sprint Backlog, Definition of Done, retrospectivas e innovación.
+- **Requisitos y diseño:** requisitos no funcionales, modelo de datos (diagrama entidad-relación), diagramas UML (casos de uso, clases y secuencia), documentación técnica y perfiles y moderación.
+- **Pruebas y operación:** plan de pruebas, manual técnico y guía de despliegue.
 
-(El antiguo documento separado "Sprint Backlog — MOZAK (APT)" quedó reemplazado por la pestaña "Planificación (Scrum)" de este documento único.)
+Los documentos de planificación originales también existen en Google Drive (carpeta MOZAK-APT); el repositorio es la versión de referencia. Los documentos marcados como borrador en `docs/README.md` necesitan confirmación del equipo.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
