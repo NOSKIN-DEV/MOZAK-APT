@@ -263,8 +263,9 @@ el comportamiento visible.
 
 ## 5.3 Enlace a Google Maps (Etapa 14, HU-28 / MA-47)
 
-**Estado: pendiente de verificación** en el equipo del usuario (las pruebas
-nuevas están escritas, pero no se declaran verificadas hasta que se ejecuten).
+**Estado: verificado.** `npm run lint`, `npm run test` (16 archivos, 205 pruebas) y
+`npm run build` el 30-10-2026, y revisión visual del botón el 19-11-2026, ambos en
+el equipo del usuario (ver «Estado del prototipo» en el README).
 
 En el detalle del evento, junto al mapa embebido de OpenStreetMap, hay un botón
 «Abrir en Google Maps» que abre una pestaña nueva con el lugar. Se usa el formato
