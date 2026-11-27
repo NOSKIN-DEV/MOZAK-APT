@@ -99,7 +99,7 @@ prisma/
   seed.ts              Carga los 24 eventos de demostración en PostgreSQL (npm run db:seed)
 public/
   media/           Afiches (posters/) y videos (videos/) de los eventos (Etapa 10)
-docs/            Documentación técnica ampliada (Etapa 10)
+docs/            Documentación del proyecto (índice en docs/README.md)
 scripts/
   check-mock-data.ts   Valida los datos mock y prueba el repositorio (npm run check:data)
 ```
@@ -389,19 +389,25 @@ sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 - ✅ **Etapa 12** — Actualización de seguridad de Next.js (26-10-2026; verificada el 30-10-2026): `next` y `eslint-config-next` pasan de 16.0.1 a **16.4.1**, la versión corregida de la rama 16 según el aviso oficial de Next.js del 14-10-2026 (<https://nextjs.org/blog/nextjs-security-update-october-14-2026>); la 16.0.1 además mostraba el aviso de CVE-2025-66478 al ejecutar `npm run dev`. Se conservan React 19.0.0 y el flag `--webpack`. Se migró `eslint.config.mjs` al formato nativo de `eslint-config-next` 16 (el modo de compatibilidad `FlatCompat` fallaba con «Converting circular structure to JSON»); `npm run lint` queda en 0 errores y 3 avisos de `react-hooks/set-state-in-effect` (`page.tsx`, `eventos/[id]/page.tsx`, `ThemeToggle.tsx`), anotados como deuda técnica. Verificada el 30-10-2026 en el entorno del usuario (Windows, Docker Desktop, Node 22.11.0), sobre la rama integrada con la Etapa 13: `npm install`, `npm ls next` (16.4.1), `npm run lint` (0 errores, 3 avisos), `npm run test` (15 archivos / 181 pruebas), `npm run build` y Docker con PostgreSQL (24 eventos sembrados, Next.js 16.4.1 «Ready») en verde. `npm audit --omit=dev` informa 4 vulnerabilidades altas que no afectan a la app en ejecución: `deepmerge-ts` llega por la herramienta de línea de comandos de Prisma (solo el contenedor de migración; la imagen de la app no la incluye) y `zod` (aviso sobre esquemas de arreglos sin límite de largo; el código no usa arreglos). Queda pendiente actualizar `zod` a 4.6.7 o superior con sus pruebas; no se usa `npm audit fix --force`, que bajaría Prisma a 6.12.0.
 - ✅ **Etapa 13** — Orden, paginación y sanitización (Sprint 4, HU-21/HU-22/HU-23; verificada el 30-10-2026): `GET /api/events` acepta `sort` (`date_asc`/`date_desc`), `page` y `limit` (por defecto 20, máximo 100) y responde `meta = { total, page, limit, totalPages, sort }`; la pantalla principal muestra el selector «Ordenar por» y la navegación Anterior/Siguiente (12 por página). Nuevo método `findPage` en `EventRepository`, probado con la misma batería de contrato en el mock y en PostgreSQL (orden y paginación se resuelven en la base con `ORDER BY`/`OFFSET`/`LIMIT`). Sanitización de entradas (NFC, espacios, caracteres de control, largo, formato de comuna y categoría, parámetros repetidos). Cierra las brechas MTC_00110 y MTC_00190 y cubre MTC_00270. **Verificada el 30-10-2026 en el entorno del usuario:** `npm run test` 15 archivos / 181 pruebas, `npm run test:db` 60/60 contra PostgreSQL real, y revisión en el navegador (selector «Ordenar por», paginación, filtros, detalle y respuestas 200/400 de `/api/events`). Cambio de contrato: sin parámetros, la API ahora devuelve la primera página de 20 (antes devolvía los 24).
 - ✅ **Etapa 14** — Botón «Abrir en Google Maps» y servidor de prueba sin costo (Sprint 4, HU-28 / MA-47). **Verificado el 30-10-2026 en el equipo del usuario:** `npm run lint` (0 errores, 3 avisos), `npm run test` (16 archivos, 205 pruebas) y `npm run build`. **Verificación visual el 19-11-2026 en el equipo del usuario:** en el detalle de «Festival de teatro callejero» el botón abre Google Maps en −33,5167; −70,6000, las coordenadas de «Centro Deportivo Demo La Florida». **Pendiente:** el despliegue en Neon + Vercel (`docs/DESPLIEGUE.md`, escrito pero aún sin ejecutar). Botón: en el detalle del evento se agrega un enlace oficial de Maps URLs (`https://www.google.com/maps/search/?api=1&query=...`, sin API key ni facturación) que se abre en una pestaña nueva. Usa las coordenadas del lugar; si no son utilizables (fuera de rango, no numéricas o el punto 0,0) usa «dirección, comuna, Chile» codificada; si no hay ninguna, el botón no se muestra. El mapa embebido de OpenStreetMap se **conserva** (un mapa de Google incrustado exige clave de API y cuenta de facturación). Lógica pura y probada en `src/lib/maps.ts`.
+- 🟡 **Etapa 15** — Perfiles de administrador y creador, y moderación de eventos (Sprint 5, HU-30 / MA-49). Está implementada en la rama `feature/roles-moderacion` (pull request #1, en borrador) y **no forma parte de este `master`**; está pendiente de verificación en el equipo del proyecto.
+
+## Integrantes y roles
+
+> **Pendiente de completar por el equipo.** Este repositorio es público: se agregan nombres y roles solo cuando cada integrante los confirme.
+
+| Integrante | Rol | Responsabilidades |
+|---|---|---|
+| *(completar)* | *(completar)* | *(completar)* |
 
 ## Documentación de la evaluación
 
-Además de este README, el proyecto cuenta con un documento maestro vivo (Claude Docs) que se mantiene actualizado clase a clase: **Documentación del Proyecto — MOZAK (APT)**, con las pestañas:
+La documentación del proyecto está en la carpeta [`docs/`](docs/README.md) (índice con el estado de cada documento):
 
-- **Resumen** — índice del documento.
-- **Planificación (Scrum)** — Product Backlog y Sprint Backlog, correlacionados con el plan de pruebas oficial del curso (32 casos MTC).
-- **Plan de Pruebas** — estrategia, tipos de prueba, metodología y herramientas de testing.
-- **Especificaciones Técnicas** — requisitos funcionales/no funcionales, stack tecnológico, historias de usuario.
-- **Modelo de Datos** — diagrama entidad-relación, modelo lógico y modelo físico (PostgreSQL + PostGIS).
-- **Arquitectura del Sistema** — diagrama de componentes, diagrama de casos de uso (UML), diagrama de proceso (BPM) y plan de dockerización.
+- **Gestión:** inicio de proyecto, metodología (Scrum), visión del producto, Product Backlog, Sprint Backlog, Definition of Done, retrospectivas e innovación.
+- **Requisitos y diseño:** requisitos no funcionales, modelo de datos (diagrama entidad-relación), diagramas UML (casos de uso, clases y secuencia) y documentación técnica.
+- **Pruebas y operación:** plan de pruebas, manual técnico y guía de despliegue.
 
-(El antiguo documento separado "Sprint Backlog — MOZAK (APT)" quedó reemplazado por la pestaña "Planificación (Scrum)" de este documento único.)
+Los documentos de planificación originales también existen en Google Drive (carpeta MOZAK-APT); el repositorio es la versión de referencia. Los documentos marcados como borrador en `docs/README.md` necesitan confirmación del equipo.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
