@@ -393,11 +393,13 @@ sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 
 ## Integrantes y roles
 
-> **Pendiente de completar por el equipo.** Este repositorio es público: se agregan nombres y roles solo cuando cada integrante los confirme.
+El equipo es de **una persona**.
 
 | Integrante | Rol | Responsabilidades |
 |---|---|---|
-| *(completar)* | *(completar)* | *(completar)* |
+| Alejandro Pedraza Soto | Product Owner, Scrum Master y desarrollador | Define el alcance y las prioridades; ejecuta y verifica cada cambio en su equipo; responde por el proyecto |
+
+**Uso de inteligencia artificial.** Se usa un asistente de IA (Claude, de Anthropic) como herramienta de apoyo para escribir código, pruebas y documentación bajo la dirección del estudiante. No es un integrante del equipo ni decide el alcance: nada se da por verificado hasta que el estudiante lo ejecuta y lo confirma en su propio equipo (ver `docs/DEFINITION-OF-DONE.md`).
 
 ## Documentación de la evaluación
 
