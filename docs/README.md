@@ -31,6 +31,7 @@
 | [`PLAN-DE-PRUEBAS.md`](PLAN-DE-PRUEBAS.md) | Estrategia, tipos de prueba (incluye seguridad, integración y rendimiento), cobertura por caso |
 | [`MANUAL-TECNICO.md`](MANUAL-TECNICO.md) | Instalación, configuración, ejecución y mantenimiento |
 | [`DESPLIEGUE.md`](DESPLIEGUE.md) | Servidor de prueba sin costo (Neon + Vercel) |
+| [`ANDROID.md`](ANDROID.md) | Versión Android (HU-27) con Capacitor: pasos, costos y riesgos (preparada, sin compilar ni probar) |
 
 ## Convención de estados
 
