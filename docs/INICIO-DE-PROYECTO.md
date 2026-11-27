@@ -1,8 +1,8 @@
 # Definición del Proyecto APT — MOZAK
 
-> **Formato:** sigue la estructura de la *Guía Estudiante — Definición Proyecto APT (Fase 1)* de la asignatura Capstone (PTY4614) y su pauta de evaluación (indicadores 1 a 13). **Estado:** borrador técnico; lo marcado **(completar)** son datos personales o reflexiones que solo el estudiante puede aportar y que no se inventaron. Los datos de contexto del proyecto salen del repositorio, de Jira y de los documentos de planificación de Drive.
+> **Formato:** sigue la estructura de la *Guía Estudiante — Definición Proyecto APT (Fase 1)* de la asignatura Capstone (PTY4614) y su pauta de evaluación (indicadores 1 a 13). Los datos de contexto salen del repositorio, de Jira y de los documentos de planificación de Drive.
 >
-> La versión que se entrega al docente debe respetar el formato de informe técnico de la guía (portada, índice, *abstract*, desarrollo, conclusiones y reflexión individuales; Arial, Verdana o Calibri de 11 o 12 puntos; número de página). Este archivo es la versión del repositorio.
+> **Dos versiones.** Este archivo es la versión del repositorio, que es público: no incluye el RUT ni el nombre del docente, ni las conclusiones y la reflexión individuales. La versión que se entrega al docente es el informe en Word (portada, índice, *abstract*, desarrollo, conclusiones y reflexión en inglés; Arial 11; número de página), que incluye esos datos.
 
 ## Portada
 
@@ -12,9 +12,9 @@
 | Proyecto | **MOZAK** — Plataforma de descubrimiento de entretenimiento y actividades |
 | Estudiante | Alejandro Pedraza Soto |
 | Carrera y sede | Ingeniería en Informática, Duoc UC, sede Maipú |
-| RUT | **(completar en la versión entregada; no se publica en este repositorio)** |
-| Docente | **(completar)** |
-| Fecha | **(completar)** |
+| RUT | *(consta en el informe entregado; no se publica en este repositorio)* |
+| Sección | 007 |
+| Inicio de la asignatura | 15-08-2026 |
 
 ## Índice
 
@@ -66,7 +66,9 @@ Ver la portada. Equipo: **una persona** (ver §6).
 
 ### 4.3 Relación con los intereses profesionales
 
-**(completar por el estudiante.)** Este apartado es personal: debe decir cuáles son tus intereses profesionales y cómo se ven reflejados en el proyecto (por ejemplo, el desarrollo full-stack, la calidad de software o la gestión ágil, si es el caso). La pauta evalúa que los menciones **y** expliques la conexión con el proyecto.
+Mi interés profesional es desarrollar soluciones de software para personas y empresas y, más adelante, formar un equipo de desarrollo y hacerlo crecer hasta constituir una consultoría o empresa de software dedicada a esa misión.
+
+MOZAK se relaciona con ese interés de dos maneras. Primero, es una solución pensada para personas: me veo reflejado en el usuario ideal, alguien que quiere conocer, en un solo lugar, toda la información sobre los eventos cercanos a los que le gustaría asistir. Segundo, el proyecto reproduce el trabajo de una consultoría de software (entender un problema, acotar el alcance, construir, probar, documentar y entregar de forma ordenada), con una proyección a futuro que incluye funciones más avanzadas, como fuentes de datos reales y búsqueda por cercanía.
 
 ### 4.4 Factibilidad
 
@@ -133,28 +135,45 @@ Las fechas son las del historial de git y del registro de verificación; los Spr
 
 ## 9. Carta Gantt
 
-La carta oficial usa las semanas S1 a S18 de las tres fases del semestre. El repositorio no registra qué fecha corresponde a cada semana, por eso la carta **por semanas queda por completar** (ver el tablero de Jira y el calendario académico). Hitos conocidos:
+Las semanas S1 a S18 salen del calendario de la asignatura, **Sección 007 (sábados)**; la primera es el 15-08-2026. Las tres fases siguen los hitos del calendario: **Fase 1** (S1–S4, Entregable 1, 20 %), **Fase 2** (S5–S15, Entregable 2.1 en S9, 25 %, y Entregable 2.2 en S15, 25 %) y **Fase 3** (S16–S18, presentación a la comisión en S17, 30 %). Las barras de desarrollo se ubican con las fechas del historial de git y del registro de verificaciones (cada fecha se asigna a la semana cuyo sábado es el siguiente o el mismo día); **E** = Etapa. Las semanas S1 a S6 no tienen registro en el repositorio.
 
-| Fecha | Hito |
-|---|---|
-| 25-09-2026 | Primer commit del repositorio |
-| 09-10-2026 | Etapas 1 a 10 verificadas (Sprints 1 a 3) |
-| 10-10-2026 | Documentos de planificación creados en Drive |
-| 26-10-2026 | Etapa 11 verificada (PostgreSQL + PostGIS) |
-| 30-10-2026 | Etapas 12 y 13 verificadas; Etapa 14 desarrollada |
-| 19-11-2026 | Etapa 14 verificada visualmente; Sprints 1 a 4 cerrados |
-| 20-11-2026 | Defensa APT |
-| 23-11-2026 | Etapa 15 implementada (rama, sin verificar) |
-| 26-11-2026 | Documentación de la evaluación integrada a `master` |
+| Actividad | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | S12 | S13 | S14 | S15 | S16 | S17 | S18 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| *Sábado (Sección 007)* | 15-08 | 22-08 | 29-08 | 05-09 | 12-09 | 19-09 | 26-09 | 03-10 | 10-10 | 17-10 | 24-10 | 31-10 | 07-11 | 14-11 | 21-11 | 28-11 | 05-12 | 12-12 |
+| Definición del proyecto | ■ | ■ | ■ | ■ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Product Backlog y planificación Scrum |  |  |  |  |  |  | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |  |  |
+| Sprint 1: prototipo con datos mock (E1–7) |  |  |  |  |  |  | ■ |  |  |  |  |  |  |  |  |  |  |  |
+| Sprint 2: pruebas automatizadas (E8) |  |  |  |  |  |  |  | ■ |  |  |  |  |  |  |  |  |  |  |
+| Sprint 3: Docker y multimedia (E9–10) |  |  |  |  |  |  |  | ■ | ■ |  |  |  |  |  |  |  |  |  |
+| Sprint 4: PostgreSQL + PostGIS (E11) |  |  |  |  |  |  |  |  |  |  | ■ | ■ |  |  |  |  |  |  |
+| Sprint 4: seguridad, orden y paginación (E12–13) |  |  |  |  |  |  |  |  |  |  |  | ■ |  |  |  |  |  |  |
+| Sprint 4: Google Maps (E14) |  |  |  |  |  |  |  |  |  |  |  | ■ |  |  | ■ |  |  |  |
+| Sprint 5: perfiles y moderación (E15) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | ■ |  |  |
+| Documentación de la evaluación y cierre |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | ■ | ■ |  |
+| Presentación a la comisión |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | ■ |  |
+| **Hitos de evaluación** |  |  |  | **E1** |  |  |  |  | **2.1** |  |  |  |  |  | **2.2** |  | **Com.** |  |
+
+Coincidencias con el calendario: el Entregable 2.1 (S9, 10-10-2026) cae un día después de verificar las Etapas 1 a 10 (09-10-2026), y el Entregable 2.2 (S15, 21-11-2026) cae dos días después de cerrar la verificación de los Sprints 1 a 4 (19-11-2026).
+
+### Hitos con fecha
+
+| Fecha | Semana | Hito |
+|---|---|---|
+| 15-08-2026 | S1 | Inicio de la asignatura |
+| 25-09-2026 | S7 | Primer commit del repositorio |
+| 09-10-2026 | S9 | Etapas 1 a 10 verificadas (Sprints 1 a 3) |
+| 10-10-2026 | S9 | Documentos de planificación creados en Drive |
+| 26-10-2026 | S12 | Etapa 11 verificada (PostgreSQL + PostGIS) |
+| 30-10-2026 | S12 | Etapas 12 y 13 verificadas; Etapa 14 desarrollada |
+| 19-11-2026 | S15 | Etapa 14 verificada visualmente; Sprints 1 a 4 cerrados |
+| 20-11-2026 | S15 | Defensa APT |
+| 23-11-2026 | S16 | Etapa 15 implementada (rama, sin verificar) |
+| 26-11-2026 | S16 | Documentación de la evaluación integrada a `master` |
+| 05-12-2026 | S17 | Presentación a la comisión |
 
 ## 10. Conclusiones y reflexión individuales
 
-La guía pide **conclusiones individuales y reflexión solo en inglés**. Son personales y evalúan tu propio aprendizaje, por eso no están escritas aquí: **(completar por el estudiante)**. Preguntas para orientarlas, con datos reales del proyecto:
-
-- *What did I learn about planning with Scrum, for example from moving HU-29 to Sprint 5 or from adding changes the user asked for?*
-- *What did I learn from the verification rule, for example the `migrate` error that only appeared on my own machine?*
-- *How did I use an AI assistant, what did I decide and verify myself, and what would I do differently?*
-- *Which competencies did I strengthen (testing, project management, data modeling, software development) and which do I still need to develop?*
+La guía pide **conclusiones individuales y reflexión solo en inglés**. Son personales y se redactan en el informe en Word que se entrega al docente; no se publican en este repositorio.
 
 ## Anexo A. Fuentes
 

@@ -6,7 +6,7 @@
 
 | Documento | Contenido | Estado |
 |---|---|---|
-| [`INICIO-DE-PROYECTO.md`](INICIO-DE-PROYECTO.md) | Definición del Proyecto APT en el formato de la Guía 1.5: fundamentación, objetivos, metodología, evidencias y plan de trabajo | Falta el RUT, los intereses profesionales, la carta Gantt por semanas y las conclusiones y reflexión individuales |
+| [`INICIO-DE-PROYECTO.md`](INICIO-DE-PROYECTO.md) | Definición del Proyecto APT en el formato de la Guía 1.5: fundamentación, objetivos, metodología, evidencias y plan de trabajo | Completo; los datos personales (RUT, docente) y las conclusiones y reflexión individuales van solo en el informe entregado |
 | [`METODOLOGIA.md`](METODOLOGIA.md) | Scrum declarado y su justificación | Borrador a confirmar |
 | [`PRODUCT-VISION.md`](PRODUCT-VISION.md) | Visión, usuarios, propuesta de valor, alcance y riesgos | Borrador a confirmar |
 | [`PRODUCT-BACKLOG.md`](PRODUCT-BACKLOG.md) | Historias HU-01 a HU-30, puntos y trazabilidad con los casos de prueba | Vigente (24-11-2026) |
