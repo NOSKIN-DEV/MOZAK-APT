@@ -20,9 +20,11 @@
 
 | Rol Scrum | Quién | Estado |
 |---|---|---|
-| Product Owner | Decide el alcance y la prioridad; hoy lo ejerce quien hace los pedidos de cambio (por ejemplo, HU-28 Google Maps, HU-29 y la Etapa 15) | **(confirmar nombre)** |
-| Scrum Master | Cuida el proceso, las reglas de verificación y el tablero | **(confirmar nombre)** |
-| Equipo de desarrollo | Diseña, programa, prueba y documenta con apoyo del asistente de IA | **(confirmar integrantes; ver «Integrantes y roles» en el README)** |
+| Product Owner | Decide el alcance y la prioridad; hace los pedidos de cambio (por ejemplo, HU-28 Google Maps, HU-29 y la Etapa 15) | Alejandro Pedraza Soto |
+| Scrum Master | Cuida el proceso, las reglas de verificación y el tablero | Alejandro Pedraza Soto |
+| Equipo de desarrollo | Diseña, programa, prueba y documenta | Alejandro Pedraza Soto, **con un asistente de IA (Claude) como herramienta de apoyo, declarado como tal** |
+
+El equipo es de **una persona**: los tres roles recaen en el estudiante, que decide, ejecuta y verifica cada cambio. El asistente de IA escribe código, pruebas y documentación bajo su dirección, pero no es un integrante ni decide el alcance.
 
 ### Ceremonias
 
