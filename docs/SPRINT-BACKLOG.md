@@ -10,7 +10,7 @@
 | 2 | MA-2 | Suite de pruebas unitarias y de integración con Vitest | 28 | Completado y verificado (41 pruebas, 7 archivos) |
 | 3 | MA-3 | Despliegue con un comando, multimedia en el detalle del evento y documentación técnica ampliada | 16 | Completado y verificado (Etapas 9–10) |
 | 4 | MA-4 | PostgreSQL/PostGIS, brechas del plan de pruebas (orden, paginación, sanitización) y ubicación en Google Maps, sin ampliar el alcance con inicio de sesión ni roles | 22 | Completado y verificado (hasta el 19-11-2026) |
-| 5 | MA-5 | Alimentar la cartelera desde fuentes externas y buscar por cercanía | 21 (+13 HU-30) | En curso; HU-30 lista (verificada 28-11-2026) |
+| 5 | MA-5 | Buscar por cercanía y datos reales (el ETL se canceló el 28-11-2026) | 13 (+13 HU-30) | En curso; HU-30 lista (verificada 28-11-2026); HU-24 cancelada |
 | 6 | MA-6 | Calidad final (E2E, rendimiento) y versión Android | 13 | Planificado |
 
 Los objetivos de los Sprints 1, 2, 3, 5 y 6 son los de la descripción de su épica en Jira; el del Sprint 4 es el del documento de planificación de Drive. Los Sprints 1 a 4 corresponden a la entrega de la defensa del 20-11-2026 (Etapas 1–14). Los Sprints 5 y 6 son la hoja de ruta posterior y pueden ajustarse.
@@ -76,9 +76,9 @@ Los objetivos de los Sprints 1, 2, 3, 5 y 6 son los de la descripción de su ép
 
 | Jira | HU | Historia | SP | Estado |
 |------|----|----------|---:|--------|
-| MA-30 | HU-24 | Ingesta de fuentes externas (ETL): importar eventos de fuentes externas para mantener la cartelera actualizada | 8 | Por hacer |
+| MA-30 | HU-24 | Ingesta de fuentes externas (ETL): importar eventos de fuentes externas para mantener la cartelera actualizada | 8 | **Cancelada** (28-11-2026) |
 | MA-31 | HU-25 | Búsqueda de eventos por proximidad (PostGIS): ver eventos cercanos a la ubicación del usuario | 8 | Por hacer |
-| MA-48 | HU-29 | Dejar de usar datos mock: la API y el frontend leen solo del repositorio real; carga inicial de eventos reales; Docker Compose levanta app + base sin pasos manuales | 5 | Por hacer (depende de HU-20 y HU-24) |
+| MA-48 | HU-29 | Dejar de usar datos mock: la API y el frontend leen solo del repositorio real; carga inicial de eventos reales; Docker Compose levanta app + base sin pasos manuales | 5 | Por hacer; por redefinir tras cancelar HU-24 |
 | MA-49 | HU-30 | Perfiles de creador y administrador con aprobación de eventos dentro de la norma | 13 (propuesta) | Listo (verificado 28-11-2026) |
 
 Subtareas de HU-30: MA-50 (migración 0002), MA-51 (autenticación y sesiones), MA-52 (flujo de moderación, política y API) y MA-53 (pantallas y documentación). Detalle técnico y pasos de verificación: [`ROLES-Y-MODERACION.md`](ROLES-Y-MODERACION.md).
