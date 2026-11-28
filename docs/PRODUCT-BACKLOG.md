@@ -40,9 +40,9 @@
 | HU-24 | MA-30 | Ingesta de fuentes externas (ETL) | 8 | — | 5 | Por hacer |
 | HU-25 | MA-31 | Búsqueda de eventos por proximidad (PostGIS) | 8 | — | 5 | Por hacer |
 | HU-29 | MA-48 | Dejar de usar datos mock (pedido del usuario; depende de HU-20 y HU-24) | 5 | — | 5 | Por hacer |
-| HU-30 | MA-49 | Perfiles de creador y administrador con aprobación de eventos dentro de la norma (pedido del usuario) | 13 (propuesta) | 15 | 5 | **Implementada en la rama `feature/roles-moderacion`; pendiente de verificación** (Jira: Por hacer) |
-| HU-31 | MA-55 | Vista de mapa con los eventos como puntos, ubicación del usuario y ficha al tocar un punto (pedido del usuario) | 8 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
-| HU-32 | MA-56 | El creador marca el lugar en un mapa en vez de escribir latitud y longitud (pedido del usuario) | 3 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
+| HU-30 | MA-49 | Perfiles de creador y administrador con aprobación de eventos dentro de la norma (pedido del usuario) | 13 (propuesta) | 15 | 5 | Listo (verificado 28-11-2026) |
+| HU-31 | MA-55 | Vista de mapa con los eventos como puntos, ubicación del usuario y ficha al tocar un punto (pedido del usuario) | 8 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; **verificación parcial (28-11-2026)**: lint, pruebas, build y la vista en el navegador; falta lo que usa la ubicación del usuario |
+| HU-32 | MA-56 | El creador marca el lugar en un mapa en vez de escribir latitud y longitud (pedido del usuario) | 3 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; compila y pasa las pruebas (28-11-2026); **falta la prueba manual del formulario** |
 | HU-26 | MA-32 | Rendimiento y pruebas E2E | 5 | — | 6 | Por hacer |
 | HU-27 | MA-33 | Versión Android | 8 | — | 6 | Por hacer |
 
@@ -56,11 +56,11 @@ La Etapa 12 (actualización de seguridad de Next.js 16.4.1 y migración de ESLin
 | 2 | MA-2 | Etapa 8: pruebas automatizadas | HU-08…16 | 28 | Listo |
 | 3 | MA-3 | Etapas 9–10: Docker, afiche y video, documentación | HU-17…19 | 16 | Listo |
 | 4 | MA-4 | PostgreSQL/PostGIS, brechas del plan de pruebas y Google Maps | HU-20…23, HU-28 | 22 | Listo |
-| 5 | MA-5 | ETL, proximidad, datos reales (+ HU-30 propuesta) | HU-24, 25, 29 (+30) | 21 (+13) | Por hacer |
+| 5 | MA-5 | ETL, proximidad, datos reales (+ HU-30) | HU-24, 25, 29 (+30) | 21 (+13) | En curso: HU-30 lista |
 | 6 | MA-6 | Rendimiento, E2E y Android | HU-26, 27 | 13 | Por hacer |
 
 - **Al 19-11-2026 (entrega de la defensa, Etapas 1–14):** 24 de 29 historias completadas; **99 de 133 puntos (74 %)**.
-- **Efecto de HU-30:** si se acepta como parte del plan (13 puntos propuestos), el total pasa a 146 puntos y 30 historias; el avance quedaría en 99 de 146 (68 %) hasta que HU-30 se verifique. El denominador cambia por un pedido del usuario, no por un error de planificación.
+- **Efecto de HU-30:** con sus 13 puntos propuestos, el total pasa a 146 puntos y 30 historias. **Al 28-11-2026, con HU-30 verificada:** 25 de 30 historias y **112 de 146 puntos (77 %)**. El denominador cambió por un pedido del usuario, no por un error de planificación. HU-31 y HU-32 (11 puntos propuestos el 28-11-2026) no están en estos totales hasta que se verifiquen.
 
 ## Trazabilidad con el plan de pruebas
 
@@ -82,7 +82,7 @@ La Etapa 12 (actualización de seguridad de Next.js 16.4.1 y migración de ESLin
 | Actualización de seguridad de Next.js 16.4.1 | 12 | — | 4 | Verificado (30-10-2026) |
 | Orden, paginación y sanitización | 13 | MTC_00110, 00190, 00270 | 4 | Verificado (30-10-2026) |
 | Ubicación en Google Maps | 14 | — | 4 | Verificado (19-11-2026) |
-| Perfiles y moderación (HU-30) | 15 | — (el plan oficial no lo contempla; ver [`PLAN-DE-PRUEBAS.md`](PLAN-DE-PRUEBAS.md)) | 5 | Pendiente de verificación |
+| Perfiles y moderación (HU-30) | 15 | — (el plan oficial no lo contempla; ver [`PLAN-DE-PRUEBAS.md`](PLAN-DE-PRUEBAS.md)) | 5 | Verificado (28-11-2026) |
 | Fin de los datos mock (HU-29) | — | — | 5 | Pendiente |
 | Importación y normalización de fuentes (ETL) | — | MTC_00220, 00230, 00240, 00250 | 5 | Pendiente |
 | Geolocalización y proximidad | — | MTC_00150 | 5 | Pendiente |
@@ -98,6 +98,7 @@ La Etapa 12 (actualización de seguridad de Next.js 16.4.1 y migración de ESLin
 | 19-11-2026 | HU-28 cerrada tras su verificación visual | Etapa 14 verificada |
 | 23-11-2026 | Se agrega HU-30 (perfiles de creador y administrador, moderación) al Sprint 5 | Pedido del usuario: el consumidor sigue sin cuenta; solo el administrador publica. Cambia el alcance acordado «sin inicio de sesión ni roles» |
 | 28-11-2026 | Se agregan HU-31 (vista de mapa) y HU-32 (ubicación marcada en el mapa) al Sprint 5 | Pedido del usuario: geo-referenciación para usar la aplicación en el teléfono, con los eventos como puntos de interés. Relacionadas con HU-25 (proximidad) y HU-27 (Android) |
+| 28-11-2026 | HU-30 cerrada tras su verificación | Etapa 15 verificada en el equipo del usuario (lint, 323 pruebas, build, 78 pruebas con PostgreSQL y prueba manual) |
 | 24-11-2026 | Se registra la tarea MA-54 (cerrar brechas de documentación de la evaluación) en el Sprint 5, sin puntos | Pedido del usuario; no es una historia de producto, por eso no cambia el total de puntos |
 
 ## Fuera de alcance por ahora

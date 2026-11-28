@@ -1,6 +1,6 @@
 # Mapa de eventos y ubicación marcada en el mapa (Etapa 16)
 
-**Estado: implementado en la rama `feature/mapa-eventos`, sin compilar ni verificar.** El entorno de apoyo no pudo instalar Leaflet ni ejecutar `npm`, así que solo se comprobaron la lógica de distancias y su verificación de tipos estricta. Todo lo demás queda «pendiente de verificación» hasta que el usuario lo ejecute en su equipo (ver [`DEFINITION-OF-DONE.md`](DEFINITION-OF-DONE.md)).
+**Estado: verificación parcial el 28-11-2026 en el equipo del usuario.** `npm install` con Leaflet, `npm run lint` (0 errores, sin avisos nuevos), `npm run test` (323 pruebas, 18 de ellas del mapa) y `npm run build` (TypeScript sin errores; `/mapa` como página estática) pasaron. En el navegador se comprobó la vista `/mapa` con sus puntos y la ficha, y que «Ver detalle» y «Cómo llegar» funcionan. **Falta verificar:** lo que usa la ubicación del usuario (estaba desactivada en el equipo; se puede simular en las herramientas de desarrollo de Chrome, en *Sensors*) y la prueba manual del formulario del creador (ver [`DEFINITION-OF-DONE.md`](DEFINITION-OF-DONE.md)).
 
 Pedido del usuario del 28-11-2026: que la aplicación tenga una vista de mapa, al estilo de las apps de transporte o de navegación, con los eventos como puntos de interés, y que al tocar un punto aparezca la información del evento cercano. Además, que el creador no tenga que escribir latitud y longitud.
 
