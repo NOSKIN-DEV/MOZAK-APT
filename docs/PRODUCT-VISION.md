@@ -15,8 +15,8 @@ La información sobre eventos está dispersa entre municipalidades, centros cult
 | Perfil | Qué necesita | Acceso |
 |---|---|---|
 | **Visitante** (consumidor) | Encontrar rápido algo que hacer cerca de él y decidir si asistir | Sin cuenta; solo lee eventos publicados |
-| **Creador** (organizador, Etapa 15) | Dar a conocer un evento de su organización | Con cuenta creada por un administrador; propone eventos, que quedan en revisión |
-| **Administrador** (Etapa 15) | Mantener el catálogo dentro de la norma de contenido | Con cuenta; es el único que puede aprobar la publicación |
+| **Creador** (organizador) | Dar a conocer un evento de su organización | Con cuenta creada por un administrador; propone eventos, que quedan en revisión |
+| **Administrador** | Mantener el catálogo dentro de la norma de contenido | Con cuenta; es el único que puede aprobar la publicación |
 
 ## Propuesta de valor
 
@@ -24,14 +24,14 @@ La información sobre eventos está dispersa entre municipalidades, centros cult
 2. **Búsqueda y filtros combinables**, con orden por fecha y paginación.
 3. **Detalle útil para decidir:** horario, lugar, precio, afiche y video, enlace a la fuente oficial y botón para abrir la ubicación en Google Maps.
 4. **Sin fricción para el visitante:** funciona desde 360 px de ancho, con modo claro y oscuro, y sin crear cuenta.
-5. **Contenido revisado** *(Etapa 15, en desarrollo en una rama aparte)*: solo se publica lo que un administrador aprueba dentro de la norma (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro). Los eventos +18 se permitirán con verificación; **el mecanismo está pendiente de decisión**.
+5. **Contenido revisado:** solo se publica lo que un administrador aprueba dentro de la norma (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro). Los eventos +18 se permitirán con verificación; **el mecanismo está pendiente de decisión**.
 
 ## Alcance
 
 | Estado | Capacidades |
 |---|---|
 | **Entregado** (Etapas 1 a 14) | Listado, búsqueda, filtros, orden y paginación, detalle con afiche y video, enlace a la fuente y a Google Maps, API interna, responsive, tema oscuro, persistencia en PostgreSQL + PostGIS, Docker, pruebas automatizadas |
-| **Implementado en una rama, por verificar** (Etapa 15) | Perfiles de creador y administrador, flujo de revisión y publicación, historial de decisiones. Vive en la rama `feature/roles-moderacion` (PR #1, borrador), **no integrada a `master`** |
+| **Implementado, por verificar** (Etapa 15) | Perfiles de creador y administrador, flujo de revisión y publicación, historial de decisiones |
 | **Hoja de ruta** (Sprints 5 y 6) | Importación de fuentes externas (ETL), búsqueda por proximidad con PostGIS, fin de los datos mock, pruebas de rendimiento y E2E, versión Android con Capacitor |
 | **Fuera de alcance por ahora** | Pagos, cuentas para visitantes, notificaciones, recuperación de contraseña, subida de imágenes por el creador |
 

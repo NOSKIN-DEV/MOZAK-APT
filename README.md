@@ -76,26 +76,34 @@ Con `DATA_SOURCE=mock` (valor por defecto) no se requiere base de datos.
 Para usar PostgreSQL (`DATA_SOURCE=postgres`) hace falta además
 `DATABASE_URL`; ver la sección «PostgreSQL (Etapa 11)».
 
+Para los paneles de creador y administrador (Etapa 15) existen además
+`SESSION_SECRET`, `ENABLE_DEMO_USERS`, `DEMO_USERS_PASSWORD` y `SEED_*`
+(ver `.env.example` y «Perfiles y moderación (Etapa 15)»).
+
 ## Estructura del proyecto
 
 ```
 src/
   app/
-    api/             API interna (Etapa 3): events, events/[id], categories, communes
+    api/             API interna: events, events/[id], categories, communes (Etapa 3); auth, creator, admin (Etapa 15)
     page.tsx           Página principal (Etapa 4/5): header, hero, filtros y listado
     eventos/[id]/      Página de detalle de evento (Etapa 6)
-  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle
+    ingresar/, creador/, admin/   Inicio de sesión y paneles de creador y administrador (Etapa 15)
+  components/    Header, Hero, SearchBar, FiltersBar, EventCard, EventGrid, EventLocationMap, EventMedia, ThemeToggle; panel/ (paneles de la Etapa 15); map/ (mapa de eventos y selector de ubicación, Etapa 16)
   lib/
     schemas.ts        Esquemas Zod (validan Category/Venue/Source/Event y filtros)
     repositories/      Abstracción EventRepository + MockEventRepository + PostgresEventRepository + fábrica por DATA_SOURCE
     db/                Cliente de Prisma compartido (solo se carga con DATA_SOURCE=postgres)
     api/               Serialización de eventos y parseo de query params para la API
     format.ts          Formato de precio (CLP) y fechas en español
+    moderation/        Ciclo de vida del evento, política de contenido y errores (Etapa 15)
+    auth/              Contraseñas, sesión firmada y bloqueo de intentos (Etapa 15)
+    server/            Manejadores de las rutas y composición de servicios (Etapa 15)
   types/         Modelos e interfaces (Event, Venue, Source, Category)
   data/          Datos mock locales (24 eventos, 12 venues, 3 sources, 9 categorías)
 prisma/
-  schema.prisma        Modelos de la base (Category, Venue, Source, Event)
-  migrations/          Migración SQL inicial (extensiones, tablas, restricciones CHECK, índices)
+  schema.prisma        Modelos de la base (Category, Venue, Source, Event, AppUser, ModerationReview)
+  migrations/          0001_init (extensiones, tablas, restricciones CHECK, índices) y 0002_roles_moderacion (Etapa 15)
   seed.ts              Carga los 24 eventos de demostración en PostgreSQL (npm run db:seed)
 public/
   media/           Afiches (posters/) y videos (videos/) de los eventos (Etapa 10)
@@ -114,6 +122,10 @@ Con el servidor corriendo (`npm run dev`), la API queda disponible en:
 | `GET /api/events/[id]`   | Detalle de un evento. 404 si no existe.                         |
 | `GET /api/categories`    | Lista de categorías disponibles.                                |
 | `GET /api/communes`      | Lista de comunas disponibles (derivadas de los venues).         |
+
+Estos endpoints públicos solo devuelven eventos **publicados** (Etapa 15). Los
+endpoints de los perfiles de creador y administrador (`/api/auth/*`,
+`/api/creator/*`, `/api/admin/*`) están en `docs/ROLES-Y-MODERACION.md`.
 
 Filtros de `GET /api/events` (todos opcionales, se combinan con AND):
 
@@ -372,6 +384,18 @@ columna geográfica de `venue` (para la búsqueda por proximidad, HU-25) se agre
 en esa historia. Esta etapa **no** cambia el mapa de la página de detalle ni incluye inicio de
 sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 
+## Perfiles y moderación (Etapa 15)
+
+El público general **no tiene cuenta**: consulta los eventos publicados en `/`.
+Quienes publican usan `/ingresar`:
+
+- **Creador** (`/creador`): crea borradores, los envía a revisión (declarando que cumplen la política de contenido) y ve el estado y los motivos de rechazo.
+- **Administrador** (`/admin`): revisa la cola, aprueba o rechaza, retira publicaciones y crea/activa/desactiva cuentas de creador.
+
+**No se permiten** eventos con desnudos o actos sexuales, drogas o tráfico de drogas, ni mercado negro. Para aprobar, el administrador debe confirmar esas tres condiciones; la revisión automática de palabras clave solo orienta y puede equivocarse.
+
+Cuentas de demostración (solo uso local): `admin@mozak.demo` y `organizador@mozak.demo`, contraseña `mozak-demo-2026` (o `DEMO_USERS_PASSWORD`). Con `DATA_SOURCE=mock` los datos creados se pierden al reiniciar. Con PostgreSQL, el administrador real se crea con `SEED_ADMIN_EMAIL` y `SEED_ADMIN_PASSWORD` al ejecutar `npm run db:seed`. **No actives las cuentas de demostración en un servidor accesible desde Internet.** Documentación completa: `docs/ROLES-Y-MODERACION.md`.
+
 ## Estado del prototipo
 
 - ✅ **Etapa 1** — Configuración base: Next.js + TypeScript + Tailwind CSS, ESLint, estructura de carpetas y variables de entorno de ejemplo.
@@ -389,28 +413,33 @@ sesión de usuarios (el enlace a Google Maps llegó en la Etapa 14).
 - ✅ **Etapa 12** — Actualización de seguridad de Next.js (26-10-2026; verificada el 30-10-2026): `next` y `eslint-config-next` pasan de 16.0.1 a **16.4.1**, la versión corregida de la rama 16 según el aviso oficial de Next.js del 14-10-2026 (<https://nextjs.org/blog/nextjs-security-update-october-14-2026>); la 16.0.1 además mostraba el aviso de CVE-2025-66478 al ejecutar `npm run dev`. Se conservan React 19.0.0 y el flag `--webpack`. Se migró `eslint.config.mjs` al formato nativo de `eslint-config-next` 16 (el modo de compatibilidad `FlatCompat` fallaba con «Converting circular structure to JSON»); `npm run lint` queda en 0 errores y 3 avisos de `react-hooks/set-state-in-effect` (`page.tsx`, `eventos/[id]/page.tsx`, `ThemeToggle.tsx`), anotados como deuda técnica. Verificada el 30-10-2026 en el entorno del usuario (Windows, Docker Desktop, Node 22.11.0), sobre la rama integrada con la Etapa 13: `npm install`, `npm ls next` (16.4.1), `npm run lint` (0 errores, 3 avisos), `npm run test` (15 archivos / 181 pruebas), `npm run build` y Docker con PostgreSQL (24 eventos sembrados, Next.js 16.4.1 «Ready») en verde. `npm audit --omit=dev` informa 4 vulnerabilidades altas que no afectan a la app en ejecución: `deepmerge-ts` llega por la herramienta de línea de comandos de Prisma (solo el contenedor de migración; la imagen de la app no la incluye) y `zod` (aviso sobre esquemas de arreglos sin límite de largo; el código no usa arreglos). Queda pendiente actualizar `zod` a 4.6.7 o superior con sus pruebas; no se usa `npm audit fix --force`, que bajaría Prisma a 6.12.0.
 - ✅ **Etapa 13** — Orden, paginación y sanitización (Sprint 4, HU-21/HU-22/HU-23; verificada el 30-10-2026): `GET /api/events` acepta `sort` (`date_asc`/`date_desc`), `page` y `limit` (por defecto 20, máximo 100) y responde `meta = { total, page, limit, totalPages, sort }`; la pantalla principal muestra el selector «Ordenar por» y la navegación Anterior/Siguiente (12 por página). Nuevo método `findPage` en `EventRepository`, probado con la misma batería de contrato en el mock y en PostgreSQL (orden y paginación se resuelven en la base con `ORDER BY`/`OFFSET`/`LIMIT`). Sanitización de entradas (NFC, espacios, caracteres de control, largo, formato de comuna y categoría, parámetros repetidos). Cierra las brechas MTC_00110 y MTC_00190 y cubre MTC_00270. **Verificada el 30-10-2026 en el entorno del usuario:** `npm run test` 15 archivos / 181 pruebas, `npm run test:db` 60/60 contra PostgreSQL real, y revisión en el navegador (selector «Ordenar por», paginación, filtros, detalle y respuestas 200/400 de `/api/events`). Cambio de contrato: sin parámetros, la API ahora devuelve la primera página de 20 (antes devolvía los 24).
 - ✅ **Etapa 14** — Botón «Abrir en Google Maps» y servidor de prueba sin costo (Sprint 4, HU-28 / MA-47). **Verificado el 30-10-2026 en el equipo del usuario:** `npm run lint` (0 errores, 3 avisos), `npm run test` (16 archivos, 205 pruebas) y `npm run build`. **Verificación visual el 19-11-2026 en el equipo del usuario:** en el detalle de «Festival de teatro callejero» el botón abre Google Maps en −33,5167; −70,6000, las coordenadas de «Centro Deportivo Demo La Florida». **Pendiente:** el despliegue en Neon + Vercel (`docs/DESPLIEGUE.md`, escrito pero aún sin ejecutar). Botón: en el detalle del evento se agrega un enlace oficial de Maps URLs (`https://www.google.com/maps/search/?api=1&query=...`, sin API key ni facturación) que se abre en una pestaña nueva. Usa las coordenadas del lugar; si no son utilizables (fuera de rango, no numéricas o el punto 0,0) usa «dirección, comuna, Chile» codificada; si no hay ninguna, el botón no se muestra. El mapa embebido de OpenStreetMap se **conserva** (un mapa de Google incrustado exige clave de API y cuenta de facturación). Lógica pura y probada en `src/lib/maps.ts`.
-- 🟡 **Etapa 15** — Perfiles de administrador y creador, y moderación de eventos (Sprint 5, HU-30 / MA-49). Está implementada en la rama `feature/roles-moderacion` (pull request #1, en borrador) y **no forma parte de este `master`**; está pendiente de verificación en el equipo del proyecto.
+
+- ✅ **Etapa 15** — Perfiles de administrador y creador, y moderación de eventos (rama `feature/roles-moderacion`). **Verificada el 28-11-2026 en el equipo del usuario** (Windows, Node 22.23.5, Docker Desktop; carpeta de la rama `feature/mapa-eventos`, que contiene la Etapa 15 completa): `npm run lint` con 0 errores y 6 avisos; `npm run test` con 25 archivos y 323 pruebas (18 de ellas son del mapa de la Etapa 16); `npm run build` correcto; Docker con PostgreSQL aplica `0001_init` y `0002_roles_moderacion` sobre una base nueva y `npm run test:db` da 78 de 78. Prueba manual: inicio de sesión, navegación por el panel sin perder la sesión, revisión y aprobación de eventos. La verificación encontró y corrigió tres defectos: un error de lint en una prueba, la sesión que se perdía al cambiar de pantalla sin `SESSION_SECRET` y dos pruebas de contrato que publicaban sin fecha de revisión. El consumidor sigue sin cuenta. Los eventos nacen como borrador, el creador los envía a revisión y **solo un administrador puede publicarlos**, confirmando tres condiciones de la norma (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro). La API pública solo muestra eventos publicados. Incluye: migración `0002_roles_moderacion` (usuarios, estado del evento, historial de decisiones), autenticación con sesión firmada, API `/api/auth`, `/api/creator` y `/api/admin`, pantallas `/ingresar`, `/creador` y `/admin`, y revisión automática de palabras clave **solo orientativa**. **Probado en un entorno de apoyo sin npm** (arnés propio de pruebas con 287 pruebas del repositorio en verde y chequeo de tipos del código nuevo); **no ejecutado todavía:** `npm run lint`, `npm run test` con Vitest, `npm run build`, la migración y `npm run test:db` contra PostgreSQL real, ni las pantallas en un navegador. Detalle, límites y pasos de verificación: `docs/ROLES-Y-MODERACION.md`.
+
+- 🟡 **Etapa 16** — Mapa de eventos cercanos y ubicación marcada en el mapa (HU-31 y HU-32, pedido del usuario del 28-11-2026; rama `feature/mapa-eventos`; **verificación parcial el 28-11-2026**: lint, pruebas, build y la vista en el navegador; falta lo que usa la ubicación del usuario y la prueba manual del formulario del creador). Vista `/mapa` con un punto por lugar, la ubicación del usuario y una ficha al tocar un punto; el creador marca el lugar tocando un mapa en vez de escribir latitud y longitud. Leaflet + OpenStreetMap, sin clave. Detalle en `docs/MAPA.md`.
 
 ## Integrantes y roles
 
-> **Pendiente de completar por el equipo.** Este repositorio es público: se agregan nombres y roles solo cuando cada integrante los confirme.
+El equipo es de **una persona**.
 
 | Integrante | Rol | Responsabilidades |
 |---|---|---|
-| *(completar)* | *(completar)* | *(completar)* |
+| Alejandro Pedraza Soto | Product Owner, Scrum Master y desarrollador | Define el alcance y las prioridades; ejecuta y verifica cada cambio en su equipo; responde por el proyecto |
+
+**Uso de inteligencia artificial.** Se usa un asistente de IA (Claude, de Anthropic) como herramienta de apoyo para escribir código, pruebas y documentación bajo la dirección del estudiante. No es un integrante del equipo ni decide el alcance: nada se da por verificado hasta que el estudiante lo ejecuta y lo confirma en su propio equipo (ver `docs/DEFINITION-OF-DONE.md`).
 
 ## Documentación de la evaluación
 
 La documentación del proyecto está en la carpeta [`docs/`](docs/README.md) (índice con el estado de cada documento):
 
 - **Gestión:** inicio de proyecto, metodología (Scrum), visión del producto, Product Backlog, Sprint Backlog, Definition of Done, retrospectivas e innovación.
-- **Requisitos y diseño:** requisitos no funcionales, modelo de datos (diagrama entidad-relación), diagramas UML (casos de uso, clases y secuencia) y documentación técnica.
+- **Requisitos y diseño:** requisitos no funcionales, modelo de datos (diagrama entidad-relación), diagramas UML (casos de uso, clases y secuencia), documentación técnica y perfiles y moderación.
 - **Pruebas y operación:** plan de pruebas, manual técnico y guía de despliegue.
 
 Los documentos de planificación originales también existen en Google Drive (carpeta MOZAK-APT); el repositorio es la versión de referencia. Los documentos marcados como borrador en `docs/README.md` necesitan confirmación del equipo.
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Fuentes externas reales (ETL), fin del uso de datos mock en producción,
-  búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones, panel
-  administrativo, versión Android vía Capacitor.
+- Fin del uso de datos mock en producción (la ingesta automática de fuentes
+  externas, ETL, se canceló el 28-11-2026), búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones,
+  cambio y recuperación de contraseña, subida de imágenes, versión Android vía Capacitor.

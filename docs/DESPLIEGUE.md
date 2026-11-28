@@ -81,6 +81,38 @@ usa la migración inicial.
 > aplicación Android. Por eso la Etapa 14 se fusiona a `master` una vez
 > verificada, y entonces la dirección pública incluye el botón de Google Maps.
 
+## Etapa 15 — Cuentas, sesiones y migración 0002 (leer antes de publicar esta etapa)
+
+La Etapa 15 agrega perfiles de creador y administrador. Para el servidor de prueba:
+
+1. **Aplicar la migración `0002_roles_moderacion` a Neon ANTES de desplegar el código nuevo.**
+   La API pública ahora filtra por `event.status`; si el código nuevo se despliega sobre
+   una base sin migrar, `/api/events` responde 500. Con la cadena **directa** (sin `-pooler`),
+   escrita en la consola y no en un archivo: `npm run db:migrate`. Los 24 eventos existentes
+   quedan como *publicados* (no cambia lo que se ve).
+2. **Variables nuevas en Vercel** (Production, Preview y Development):
+
+   | Nombre | Valor |
+   |--------|-------|
+   | `SESSION_SECRET` | texto aleatorio de **32 caracteres o más** (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`). Es una clave: no se comparte ni se guarda en el repositorio. Sin ella, cada instancia genera una distinta y las sesiones fallan de forma intermitente. |
+
+3. **Crear el administrador** con la semilla, desde el computador y con la cadena directa,
+   escritas solo en esa ventana de la consola:
+   `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` (mínimo 10 caracteres) y `DATABASE_URL`, luego `npm run db:seed`.
+   La semilla no imprime contraseñas y es idempotente. **No** definir `SEED_DEMO_USERS` contra
+   la base pública: las cuentas de demostración tienen la contraseña escrita en el repositorio.
+4. Los creadores los crea el administrador desde `/admin → Creadores`.
+
+> **Los paneles requieren PostgreSQL.** En modo mock los datos viven en la memoria de cada
+> función de Vercel y se pierden entre invocaciones, y en producción las cuentas de demostración
+> no se crean (salvo `ENABLE_DEMO_USERS=true`, que no debe usarse en un servidor público). Por eso,
+> si se usa la red de seguridad «modo mock», el sitio público sigue funcionando pero **no** se
+> puede iniciar sesión.
+>
+> **Limitación del límite de intentos de ingreso:** el contador está en la memoria de cada
+> instancia; en Vercel no se comparte entre instancias, así que protege menos que en un
+> servidor único.
+
 ## Verificación (Parte C)
 
 Con la dirección pública (`https://<proyecto>.vercel.app`):
@@ -89,6 +121,8 @@ Con la dirección pública (`https://<proyecto>.vercel.app`):
 2. La página principal muestra eventos (12 por página), los filtros y la paginación funcionan.
 3. El detalle de un evento (`/eventos/event-002`) muestra el mapa y el botón «Abrir en Google Maps».
 4. Abierta desde el teléfono (Chrome), todo se ve y se puede usar.
+5. *(Etapa 15)* `/ingresar` permite entrar con el administrador creado en la semilla y
+   `/admin` muestra la cola de revisión; `/creador` sin sesión redirige a `/ingresar`.
 
 La primera visita tras un rato sin uso puede tardar unos segundos extra: Neon
 apaga la base a los 5 minutos y la despierta con la primera consulta.

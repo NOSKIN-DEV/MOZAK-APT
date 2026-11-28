@@ -292,6 +292,25 @@ facturación, lo que no corresponde a un prototipo de costo cero.
 
 Pruebas: `src/lib/maps.test.ts` (parte de `npm run test`).
 
+## 5.4 Perfiles, moderación y política de contenido (Etapa 15)
+
+El consumidor no tiene cuenta. Se agregan los perfiles **creador** y **administrador**, un
+flujo `BORRADOR → EN REVISIÓN → PUBLICADO | RECHAZADO` en el que **solo el administrador publica**, y una
+política de contenido (sin desnudos ni actos sexuales, sin drogas ni tráfico de drogas, sin mercado negro).
+
+- **Capas:** `src/lib/moderation/` (política, esquemas Zod, servicio de flujo `EventWorkflowService`),
+  `src/lib/auth/` (scrypt, sesión HMAC, límite de intentos), `src/lib/server/` (manejadores basados en
+  `Request`/`Response`, probados sin Next), `src/app/api/{auth,creator,admin}` (rutas delgadas) y
+  `src/components/panel/` + páginas `/ingresar`, `/creador`, `/admin`.
+- **Puertos:** `EventManagementRepository` y `UserRepository` (`management-repository.ts`) con adaptador en memoria
+  (`MemoryStore` compartido con el repositorio público) y adaptador PostgreSQL (`postgres-management-repository.ts`,
+  `postgres-user-repository.ts`), ambos contra la misma batería de contrato.
+- **Garantías de integridad:** transiciones atómicas (compare-and-set + registro de la decisión en una transacción)
+  y restricciones SQL (`event_published_reviewed_chk`, aprobación exige `checklist_confirmed`).
+- **Datos:** migración `0002_roles_moderacion` (`app_user`, `moderation_review`, columnas nuevas de `event`).
+  La API y las páginas públicas solo leen eventos `PUBLISHED`.
+- **Detalle, endpoints, límites y verificación:** `docs/ROLES-Y-MODERACION.md`.
+
 ## 6. Docker
 
 `docker compose up --build` construye una imagen multi-stage
@@ -352,3 +371,7 @@ necesita. Más detalle en la sección «Docker» del README.
   `event-001` coinciden, y solo afecta a eventos con la misma fecha y hora.
 - Los afiches y videos son de demostración; en producción deberían servirse
   desde almacenamiento/CDN (el esquema ya acepta URLs absolutas).
+- Etapa 15: la revisión automática de contenido es por palabras clave (sin análisis de
+  imágenes ni videos), el límite de intentos de ingreso es por instancia, no hay cambio ni
+  recuperación de contraseña, y en modo mock los datos creados se pierden al reiniciar. Ver
+  `docs/ROLES-Y-MODERACION.md` §8.

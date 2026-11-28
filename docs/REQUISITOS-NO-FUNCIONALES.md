@@ -1,6 +1,6 @@
 # Requisitos no funcionales — MOZAK (APT)
 
-> **Fuente y vigencia.** RNF-01 a RNF-10 son los del documento de Drive «Especificaciones Técnicas del Software - MOZAK» (30-10-2026), con su estado de cumplimiento tal como el equipo lo registró. **RNF-11 y RNF-12 son nuevos (Etapa 15, 23-11-2026): se cumplen solo en la rama `feature/roles-moderacion`, que no está integrada a `master`, y están pendientes de verificación.** La columna «Cómo se comprueba» indica la evidencia que existe o que falta. Los requisitos funcionales y las historias de usuario siguen en el documento de Drive; el diseño que sostiene estos RNF está en [`DOCUMENTACION-TECNICA.md`](DOCUMENTACION-TECNICA.md).
+> **Fuente y vigencia.** RNF-01 a RNF-10 son los del documento de Drive «Especificaciones Técnicas del Software - MOZAK» (30-10-2026), con su estado de cumplimiento tal como el equipo lo registró. **RNF-11 y RNF-12 son nuevos (Etapa 15, 23-11-2026) y están pendientes de verificación.** La columna «Cómo se comprueba» indica la evidencia que existe o que falta. Los requisitos funcionales y las historias de usuario siguen en el documento de Drive; el diseño que sostiene estos RNF está en [`DOCUMENTACION-TECNICA.md`](DOCUMENTACION-TECNICA.md).
 
 | ID | Categoría | Requisito | Cumplimiento actual | Cómo se comprueba |
 |----|-----------|-----------|---------------------|-------------------|
