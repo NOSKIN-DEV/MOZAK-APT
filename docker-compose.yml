@@ -9,6 +9,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # Etapa 15: cuentas de DEMOSTRACIÓN (admin@mozak.demo y organizador@mozak.demo)
+      # para probar los paneles en tu propio computador. Pon "false" si este
+      # contenedor va a ser accesible desde otros equipos o desde Internet.
+      - ENABLE_DEMO_USERS=${ENABLE_DEMO_USERS:-true}
+      # Firma de las sesiones (mínimo 32 caracteres). Vacío = secreto temporal:
+      # sirve para una sola instancia local; las sesiones se pierden al reiniciar.
+      - SESSION_SECRET=${SESSION_SECRET:-}
     restart: unless-stopped
     healthcheck:
       # El prototipo no tiene curl/wget en la imagen final (es node:22-slim

@@ -1,6 +1,6 @@
 # Definition of Done — MOZAK (APT)
 
-> Criterios para dar una historia, un sprint y una entrega por terminados. Parte de la definición vigente en la planificación (Drive, 19-11-2026) y le suma las reglas que se aplican al integrar la Etapa 15. **BORRADOR para confirmar**: los criterios de sprint y de entrega los redactó el asistente a partir de la práctica del proyecto.
+> Criterios para dar una historia, un sprint y una entrega por terminados. Parte de la definición vigente en la planificación (Drive, 19-11-2026) y le suma las reglas que se aplican desde la Etapa 15. **BORRADOR para confirmar**: los criterios de sprint y de entrega los redactó el asistente a partir de la práctica del proyecto.
 
 ## 1. Historia de usuario o tarea
 
@@ -33,7 +33,7 @@ Un sprint está **cerrado** cuando:
 - Los casos del plan oficial (.xlsx) están marcados OK o NOK, nunca «pendiente» ([`PLAN-DE-PRUEBAS.md`](PLAN-DE-PRUEBAS.md)).
 - Las limitaciones conocidas están escritas, no ocultas.
 
-## 4. Criterios adicionales para código con riesgo de seguridad (se aplican al integrar la Etapa 15)
+## 4. Criterios adicionales para código con riesgo de seguridad (desde la Etapa 15)
 
 - Toda ruta que exige sesión responde 401 sin sesión y 403 con el perfil equivocado, y tiene prueba.
 - Toda acción que cambia datos comprueba el origen de la petición.

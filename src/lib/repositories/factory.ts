@@ -1,4 +1,5 @@
 import type { EventRepository } from "./event-repository";
+import { getSharedMemoryStore, type MemoryStore } from "./memory-store";
 import { MockEventRepository } from "./mock-event-repository";
 
 export type DataSource = "mock" | "postgres";
@@ -23,8 +24,16 @@ export function resolveDataSource(raw: string | undefined = process.env.DATA_SOU
  * Crea el repositorio según la fuente de datos. El repositorio de PostgreSQL
  * se carga de forma diferida (import dinámico): en modo mock nunca se carga
  * @prisma/client, así que el prototipo sigue funcionando sin base de datos.
+ *
+ * `store` (solo modo mock, Etapa 15): almacén en memoria que se comparte con la
+ * gestión de eventos, de modo que lo que aprueba un administrador aparece en
+ * el listado público. Sin él, el repositorio mock usa su propia copia de los
+ * datos de demostración.
  */
-export async function createEventRepository(source: DataSource = resolveDataSource()): Promise<EventRepository> {
+export async function createEventRepository(
+  source: DataSource = resolveDataSource(),
+  store?: MemoryStore,
+): Promise<EventRepository> {
   if (source === "postgres") {
     if (!process.env.DATABASE_URL) {
       throw new Error('DATA_SOURCE="postgres" requiere definir DATABASE_URL (ver .env.example).');
@@ -36,14 +45,15 @@ export async function createEventRepository(source: DataSource = resolveDataSour
     return new PostgresEventRepository(getPrisma());
   }
 
-  return new MockEventRepository();
+  return new MockEventRepository(store);
 }
 
 let pending: Promise<EventRepository> | undefined;
 
 function getRepository(): Promise<EventRepository> {
   if (!pending) {
-    pending = createEventRepository().catch((error: unknown) => {
+    const source = resolveDataSource();
+    pending = createEventRepository(source, source === "mock" ? getSharedMemoryStore() : undefined).catch((error: unknown) => {
       pending = undefined; // si la configuración estaba mal, permite reintentar tras corregirla
       throw error;
     });

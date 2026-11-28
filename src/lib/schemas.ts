@@ -78,8 +78,8 @@ export const eventSchema = z
  *   (ej. "Ñuñoa", "Estación Central", "O'Higgins"); máximo 60 caracteres.
  * - search: texto libre; se admite cualquier carácter salvo los de control.
  */
-const CATEGORY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$/;
-const COMMUNE_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\p{N} .'’-]{0,59}$/u;
+export const CATEGORY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$/;
+export const COMMUNE_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}\p{N} .'’-]{0,59}$/u;
 
 /**
  * Filtros combinables de búsqueda de eventos (Etapa 5).

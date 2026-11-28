@@ -6,7 +6,7 @@
 
 | Documento | Contenido | Estado |
 |---|---|---|
-| [`INICIO-DE-PROYECTO.md`](INICIO-DE-PROYECTO.md) | Documento de inicio: objetivos, alcance, hitos, riesgos | Provisional (falta la Guía 1.5 y los datos del equipo) |
+| [`INICIO-DE-PROYECTO.md`](INICIO-DE-PROYECTO.md) | Definición del Proyecto APT en el formato de la Guía 1.5: fundamentación, objetivos, metodología, evidencias y plan de trabajo | Completo; los datos personales (RUT, docente) y las conclusiones y reflexión individuales van solo en el informe entregado |
 | [`METODOLOGIA.md`](METODOLOGIA.md) | Scrum declarado y su justificación | Borrador a confirmar |
 | [`PRODUCT-VISION.md`](PRODUCT-VISION.md) | Visión, usuarios, propuesta de valor, alcance y riesgos | Borrador a confirmar |
 | [`PRODUCT-BACKLOG.md`](PRODUCT-BACKLOG.md) | Historias HU-01 a HU-30, puntos y trazabilidad con los casos de prueba | Vigente (24-11-2026) |
@@ -23,6 +23,7 @@
 | [`MODELO-DE-DATOS.md`](MODELO-DE-DATOS.md) | Diagrama entidad-relación, modelo lógico, índices y migraciones |
 | [`DIAGRAMAS-UML.md`](DIAGRAMAS-UML.md) | Casos de uso, clases y secuencia |
 | [`DOCUMENTACION-TECNICA.md`](DOCUMENTACION-TECNICA.md) | Arquitectura, API, pruebas por etapa y decisiones |
+| [`ROLES-Y-MODERACION.md`](ROLES-Y-MODERACION.md) | Perfiles, ciclo de vida del evento y política de contenido (Etapa 15) |
 
 ## Pruebas y operación
 
@@ -35,6 +36,6 @@
 ## Convención de estados
 
 - **Verificado:** el usuario lo ejecutó en su equipo y lo confirmó.
-- **Pendiente de verificación:** implementado, sin confirmar en el equipo del proyecto (hoy, la Etapa 15, que vive en la rama `feature/roles-moderacion` y no está en `master`; su documentación `ROLES-Y-MODERACION.md` llega con ella).
+- **Pendiente de verificación:** implementado, sin confirmar en el equipo del proyecto (al 28-11-2026, la Etapa 16 en la rama `feature/mapa-eventos`).
 - **Futuro:** planificado, sin implementar.
 - **(completar)** o **(confirmar):** dato que no está en el repositorio y no se inventó.

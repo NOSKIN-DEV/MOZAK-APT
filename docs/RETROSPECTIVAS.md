@@ -20,6 +20,9 @@
 | 4 | Etapa 12, 30-10-2026 | `npm audit` informó 4 vulnerabilidades altas | Cada hallazgo se evalúa antes de actuar; `--force` puede romper el proyecto | Evaluación registrada; no se usó `--force` |
 | 5 | 19-11-2026 | HU-29 (fin de los datos mock) dependía de la ingesta de fuentes (HU-24) | Las dependencias entre historias deben verse al planificar, no al ejecutar | HU-29 pasó al Sprint 5 |
 | 6 | Etapa 15, 23-11-2026 | El entorno de apoyo no podía ejecutar `npm`, y el clon del usuario tenía cambios sin guardar en otra rama | Separar lo verificado de lo no ejecutado y evitar cambiar de rama sobre trabajo sin guardar | Arnés de pruebas propio, documentación con «pendiente de verificación» explícito y clon nuevo en carpeta aparte |
+| 7 | Verificación de la Etapa 15, 28-11-2026 | Sin `SESSION_SECRET`, la sesión se perdía al cambiar de pantalla: Next.js carga el mismo módulo más de una vez y cada copia generaba su propio secreto | Un estado «global» guardado en una variable de módulo no es global en Next.js | Secreto temporal en `globalThis` y prueba de regresión que carga el módulo dos veces |
+| 8 | Verificación de la Etapa 15, 28-11-2026 | La restricción `event_published_reviewed_chk` de PostgreSQL rechazó dos pruebas que publicaban sin fecha de revisión; en memoria pasaban | Las reglas de la base son una defensa real, y el modo en memoria debe aplicar las mismas para que las pruebas rápidas las detecten | Pruebas corregidas; el repositorio en memoria aplica la misma regla; prueba de contrato nueva |
+| 9 | Verificación de la Etapa 15, 28-11-2026 | Docker no levantó la base porque otra carpeta del proyecto ya tenía un contenedor `mozak-db` | Los nombres fijos de contenedor chocan entre copias del proyecto | Se borraron los contenedores antiguos (`docker rm -f`); queda evaluar quitar `container_name` del compose |
 
 ## 3. Plantilla para la próxima retrospectiva
 

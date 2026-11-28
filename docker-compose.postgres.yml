@@ -11,6 +11,11 @@
 #   app     → el mismo servicio de docker-compose.yml, pero con
 #             DATA_SOURCE=postgres y DATABASE_URL apuntando a "db".
 #
+# Etapa 15 (perfiles): la tarea "migrate" también crea las cuentas de la plataforma.
+#   SEED_DEMO_USERS=true (valor por defecto aquí, solo para uso local) crea
+#   admin@mozak.demo y organizador@mozak.demo. Para un administrador propio define
+#   SEED_ADMIN_EMAIL y SEED_ADMIN_PASSWORD (mínimo 10 caracteres) en tu archivo .env.
+#
 # Credenciales: son SOLO de desarrollo local y se pueden cambiar con la variable
 # POSTGRES_PASSWORD (por ejemplo en un archivo .env junto a este). No usar estos
 # valores por defecto fuera de tu máquina.
@@ -49,6 +54,11 @@ services:
     container_name: mozak-migrate
     environment:
       DATABASE_URL: postgresql://mozak:${POSTGRES_PASSWORD:-mozak_dev}@db:5432/mozak?schema=public
+      SEED_DEMO_USERS: ${SEED_DEMO_USERS:-true}
+      DEMO_USERS_PASSWORD: ${DEMO_USERS_PASSWORD:-}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-}
     depends_on:
       db:
         condition: service_healthy

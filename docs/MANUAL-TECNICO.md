@@ -1,6 +1,6 @@
 # Manual técnico — MOZAK (APT)
 
-> Guía para instalar, configurar, ejecutar, probar y mantener la aplicación. Es un **resumen operativo**: para el detalle de cada tema se enlaza el documento correspondiente. Los comandos son los de `package.json` de `master`. Los perfiles de creador y administrador (Etapa 15) están en la rama `feature/roles-moderacion` y **no se describen aquí** hasta que se integren, porque no están verificados.
+> Guía para instalar, configurar, ejecutar, probar y mantener la aplicación. Es un **resumen operativo**: para el detalle de cada tema se enlaza el documento correspondiente. Los comandos son los de `package.json`; lo que corresponde a la Etapa 15 está **pendiente de verificación en el equipo del proyecto**.
 
 ## 1. Requisitos
 
@@ -21,6 +21,8 @@ cd mozak-apt
 npm install        # también ejecuta "prisma generate"
 ```
 
+La Etapa 15 (perfiles y moderación) está en la rama `feature/roles-moderacion` (pull request #1, en borrador) hasta que se verifique e integre a `master`.
+
 Recomendación para Windows: **no** trabajar dentro de una carpeta sincronizada (OneDrive, Dropbox, Google Drive); usar una ruta simple como `C:\dev\mozak-apt`. Los scripts `dev` y `build` usan `--webpack` por un error de Turbopack documentado en el README.
 
 ## 3. Modos de ejecución
@@ -33,7 +35,7 @@ Recomendación para Windows: **no** trabajar dentro de una carpeta sincronizada 
 | Docker con PostgreSQL + PostGIS | `npm run docker:postgres` | Base de datos (migra y carga la semilla) | Docker |
 | Desarrollo sobre PostgreSQL | Levantar el servicio `db`, definir `DATABASE_URL` y `DATA_SOURCE=postgres`, `npm run db:migrate`, `npm run db:seed`, `npm run dev` | Base de datos | Node y Docker |
 
-La aplicación queda en `http://localhost:3000`.
+La aplicación queda en `http://localhost:3000`. Con `DATA_SOURCE=mock`, los eventos creados desde los paneles **se pierden al reiniciar**.
 
 ## 4. Configuración
 
@@ -44,6 +46,10 @@ Copiar `.env.example` a `.env.local` (Next.js) y, para la CLI de Prisma, definir
 | `DATA_SOURCE` | `mock` (por defecto) o `postgres` | Elige el repositorio de datos |
 | `DATABASE_URL` | `postgresql://usuario:clave@host:5432/mozak?schema=public` | Obligatoria con `postgres` |
 | `POSTGRES_PASSWORD`, `DB_PORT` | `mozak_dev`, `5432` | Base de Docker (solo desarrollo local; el puerto se publica en 127.0.0.1) |
+| `SESSION_SECRET` | Texto aleatorio de 32 caracteres o más | Firma de sesiones (Etapa 15). Obligatoria con varias instancias o en Vercel |
+| `ENABLE_DEMO_USERS`, `DEMO_USERS_PASSWORD` | `true`, texto | Cuentas de demostración en modo mock. **No activarlas en un servidor público** |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_ADMIN_NAME` | Texto (contraseña de 10 caracteres o más) | `npm run db:seed` crea el administrador real |
+| `SEED_DEMO_USERS` | `true` | Cuentas de demostración en la base (solo local) |
 
 ## 5. Comandos
 
@@ -55,7 +61,7 @@ Copiar `.env.example` a `.env.local` (Next.js) y, para la CLI de Prisma, definir
 | `npm run test:db` | Pruebas contra PostgreSQL real (base levantada, migrada y con semilla) |
 | `npm run check:data` | Valida los datos de demostración y los filtros |
 | `npm run db:migrate` | Aplica las migraciones (`prisma migrate deploy`) |
-| `npm run db:seed` | Carga los 24 eventos de demostración (idempotente) |
+| `npm run db:seed` | Carga los 24 eventos de demostración y, según variables, las cuentas (idempotente) |
 | `npm run docker:mock` / `docker:postgres` | Docker sin y con base de datos |
 
 ## 6. Estructura del repositorio
@@ -64,17 +70,20 @@ Copiar `.env.example` a `.env.local` (Next.js) y, para la CLI de Prisma, definir
 src/
   app/
     page.tsx, eventos/[id]/   Pantalla principal y detalle público
-    api/                      events, events/[id], categories, communes
-  components/                 Interfaz pública (EventCard, FiltersBar, EventLocationMap, …)
+    ingresar/, creador/, admin/   Inicio de sesión y paneles (Etapa 15)
+    api/                      events, categories, communes (públicas); auth, creator, admin (Etapa 15)
+  components/                 Interfaz pública (EventCard, FiltersBar, …) y components/panel/ (paneles)
   lib/
-    api/                      Parseo y serialización de la API
     schemas.ts, sanitize.ts   Validación Zod y sanitización de entradas
     format.ts, maps.ts        Formato de precio y fechas; enlaces de Google Maps
-    repositories/             Interfaz EventRepository con sus implementaciones mock y PostgreSQL, y la batería de contrato
+    repositories/             Interfaces EventRepository, EventManagementRepository y UserRepository con sus implementaciones mock y PostgreSQL
+    moderation/               Ciclo de vida del evento, política de contenido y errores
+    auth/                     Hash de contraseñas, sesión firmada y bloqueo de intentos
+    server/                   Manejadores de las rutas y composición de servicios
     db/                       Cliente de Prisma (solo con DATA_SOURCE=postgres)
   data/                       Datos de demostración (24 eventos, 12 recintos, 3 fuentes, 9 categorías)
   types/                      Modelos de dominio
-prisma/                       schema.prisma, migración 0001_init y seed.ts
+prisma/                       schema.prisma, migraciones (0001_init, 0002_roles_moderacion) y seed.ts
 public/media/                 Afiches y videos de demostración
 scripts/                      check-mock-data.ts
 docs/                         Documentación (índice en docs/README.md)
@@ -84,14 +93,17 @@ La arquitectura y las decisiones de diseño están en [`DOCUMENTACION-TECNICA.md
 
 ## 7. Base de datos
 
-- Modelo y migraciones: [`MODELO-DE-DATOS.md`](MODELO-DE-DATOS.md).
+- Modelo y migraciones: [`MODELO-DE-DATOS.md`](MODELO-DE-DATOS.md). La migración `0002_roles_moderacion` **debe aplicarse antes de desplegar la Etapa 15** (ver [`DESPLIEGUE.md`](DESPLIEGUE.md)).
 - Las migraciones se aplican con `npm run db:migrate`; la semilla es idempotente.
 - La búsqueda y el filtro por comuna usan consultas parametrizadas; el texto del usuario nunca se concatena al SQL.
 - Las claves de la base en Docker son de desarrollo local y no deben usarse en un servidor accesible desde Internet.
 
 ## 8. Cuentas y seguridad
 
-En `master` el visitante consulta sin cuenta y no hay inicio de sesión. Los perfiles de creador y administrador (Etapa 15) están en la rama `feature/roles-moderacion`, con su propia documentación, y se agregan a este manual al integrarse. Las entradas de la API se sanitizan y validan, y las consultas a la base son parametrizadas (ver el plan de pruebas, §5).
+- El visitante no tiene cuenta. Creador y administrador inician sesión en `/ingresar`; solo un administrador crea cuentas de creador (no hay registro abierto).
+- Contraseñas con scrypt; sesión firmada con HMAC, de 8 horas, en cookie `HttpOnly` y `SameSite=Lax`; bloqueo tras 5 intentos fallidos en 15 minutos por IP y correo.
+- Las cuentas de demostración existen solo con `ENABLE_DEMO_USERS` o `SEED_DEMO_USERS`.
+- Detalle: [`ROLES-Y-MODERACION.md`](ROLES-Y-MODERACION.md).
 
 ## 9. Pruebas y calidad
 
@@ -108,6 +120,7 @@ Servidor de prueba sin costo con Neon (base) y Vercel (aplicación): [`DESPLIEGU
 | Agregar afiche o video a un evento | Copiar el archivo a `public/media/posters/` o `public/media/videos/` y referenciarlo (ver `DOCUMENTACION-TECNICA.md`, sección 4) |
 | Cambiar de fuente de datos | Cambiar `DATA_SOURCE`; la API y la interfaz no cambian |
 | Actualizar dependencias | `npm install`, y luego `npm run lint`, `npm run test`, `npm run build`; evaluar `npm audit --omit=dev` y **no** usar `--force` |
+| Ver la política de contenido | `src/lib/moderation/content-policy.ts` (versión `2026-11-v1`) |
 
 ## 12. Solución de problemas
 
@@ -121,9 +134,10 @@ Servidor de prueba sin costo con Neon (base) y Vercel (aplicación): [`DESPLIEGU
 | `npm run test:db` falla o encuentra 0 eventos | Falta `npm run db:migrate` y `npm run db:seed` |
 | «port is already allocated» | Detener `npm run dev` u otro proceso en el puerto 3000 (o `DB_PORT=5433` para la base) |
 | `docker compose` no conecta | Abrir Docker Desktop y esperar «Engine running» |
+| Las sesiones se pierden al reiniciar | Definir `SESSION_SECRET` (sin él, el secreto es temporal y solo sirve en una instancia) |
 
 Más casos en la sección 8 de [`DOCUMENTACION-TECNICA.md`](DOCUMENTACION-TECNICA.md).
 
 ## 13. Limitaciones conocidas
 
-Datos de demostración por defecto, sin fuentes reales todavía; sin mediciones de rendimiento. Ver `DOCUMENTACION-TECNICA.md` (sección 9).
+Datos de demostración por defecto, sin fuentes reales todavía; bloqueo de intentos de ingreso en memoria (por instancia); sin cambio ni recuperación de contraseña; sin mediciones de rendimiento. Ver `DOCUMENTACION-TECNICA.md` (sección 9) y `ROLES-Y-MODERACION.md` (sección 8).
