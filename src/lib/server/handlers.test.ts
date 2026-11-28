@@ -25,6 +25,8 @@ function request(method: string, path: string, call: Call = {}): Request {
   });
 }
 
+// Las pruebas leen campos de respuestas con formas distintas (data, error, code, issues).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- cuerpo JSON de forma variable, solo en pruebas
 async function bodyOf(response: Response): Promise<any> {
   return response.json();
 }
