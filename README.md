@@ -440,6 +440,6 @@ Los documentos de planificación originales también existen en Google Drive (ca
 
 ## Próximas funcionalidades (no incluidas todavía)
 
-- Fuentes externas reales (ETL), fin del uso de datos mock en producción,
-  búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones,
+- Fin del uso de datos mock en producción (la ingesta automática de fuentes
+  externas, ETL, se canceló el 28-11-2026), búsqueda por proximidad con PostGIS, pagos, cuentas de usuario avanzadas, notificaciones,
   cambio y recuperación de contraseña, subida de imágenes, versión Android vía Capacitor.

@@ -8,7 +8,7 @@ Definir **cómo** se prueba MOZAK (APT) y dejar trazabilidad entre requisito →
 
 - **Producto:** que cada funcionalidad entregada (búsqueda, filtros, orden y paginación, detalle, API interna, persistencia, responsive, perfiles y moderación) se comporte como se especificó y no retroceda.
 - **Proceso:** que las pruebas se ejecuten antes de cada entrega y que un cambio **no se dé por verificado hasta que el usuario lo ejecuta en su equipo**; hasta entonces el estado es «pendiente de verificación».
-- **Fuera de alcance:** importación desde fuentes externas (ETL, Sprint 5), geolocalización y proximidad (HU-25, Sprint 5), empaquetado Android (Sprint 6).
+- **Fuera de alcance:** importación desde fuentes externas (ETL, cancelada el 28-11-2026), geolocalización y proximidad (HU-25, Sprint 5), empaquetado Android (Sprint 6).
 
 ## 2. Tipos de prueba
 
@@ -101,7 +101,7 @@ El libro oficial todavía registra los 32 casos como «Pendiente de ejecución»
 | MTC_00190 | Paginación o límite de resultados | Automatizada, Etapa 13 (verificado 30-10-2026) |
 | MTC_00200 | API de consulta de eventos | Automatizada |
 | MTC_00210 | Conexión API ↔ PostgreSQL | `npm run test:db` (verificado 26-10-2026) |
-| MTC_00220 a 00250 | Importación, normalización, duplicados y fuente caída (ETL) | Futuro (Sprint 5) |
+| MTC_00220 a 00250 | Importación, normalización, duplicados y fuente caída (ETL) | Cancelados con HU-24 (28-11-2026) |
 | MTC_00260 | Integridad de datos obligatorios | Automatizada (Zod, CHECK y claves foráneas en `test:db`) |
 | MTC_00270 | Seguridad básica de parámetros | Sanitización y 400 ante entradas hostiles, Etapa 13 (verificado 30-10-2026); ver §5 |
 | MTC_00280 / 00290 | Flujos E2E (escritorio y móvil) | Manual hoy; Playwright planificado (Sprint 6) |
