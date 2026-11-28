@@ -36,6 +36,6 @@
 ## Convención de estados
 
 - **Verificado:** el usuario lo ejecutó en su equipo y lo confirmó.
-- **Pendiente de verificación:** implementado, sin confirmar en el equipo del proyecto (hoy, la Etapa 15).
+- **Pendiente de verificación:** implementado, sin confirmar en el equipo del proyecto (al 28-11-2026, la Etapa 16 en la rama `feature/mapa-eventos`).
 - **Futuro:** planificado, sin implementar.
 - **(completar)** o **(confirmar):** dato que no está en el repositorio y no se inventó.

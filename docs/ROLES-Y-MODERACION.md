@@ -2,7 +2,7 @@
 
 Este documento describe cómo funcionan los perfiles de **administrador** y **creador**, el flujo de aprobación de eventos y la política de contenido de MOZAK. El **usuario consumidor no tiene cuenta**: para él la plataforma sigue siendo de consulta (solo ve eventos publicados).
 
-> **Estado:** implementado en la rama `feature/roles-moderacion`. Las pruebas automáticas del backend se ejecutaron en un entorno de apoyo sin npm; la compilación, el lint, PostgreSQL y las pantallas en navegador **deben ser verificados en el equipo del proyecto** (ver «Cómo verificarlo»).
+> **Estado:** implementado en la rama `feature/roles-moderacion`. **Verificado el 28-11-2026 en el equipo del usuario** (Windows, Node 22.23.5, Docker Desktop; carpeta de la rama `feature/mapa-eventos`, que contiene la Etapa 15 completa): `npm run lint` con 0 errores y 6 avisos; `npm run test` con 25 archivos y 323 pruebas (18 de ellas son del mapa de la Etapa 16); `npm run build` correcto; Docker con PostgreSQL aplica `0001_init` y `0002_roles_moderacion` sobre una base nueva y `npm run test:db` da 78 de 78. Prueba manual: inicio de sesión, navegación por el panel sin perder la sesión, revisión y aprobación de eventos. La verificación encontró y corrigió tres defectos: un error de lint en una prueba, la sesión que se perdía al cambiar de pantalla sin `SESSION_SECRET` y dos pruebas de contrato que publicaban sin fecha de revisión.
 
 ## 1. Perfiles
 

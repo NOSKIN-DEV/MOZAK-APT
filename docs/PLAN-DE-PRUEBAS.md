@@ -126,7 +126,7 @@ La Etapa 15 (perfiles y moderación) **no tiene casos en el plan oficial**; se c
 - **Umbrales:** **pendientes de definir con el equipo y el docente**; no se fijan números aquí para no inventar objetivos. Cada resultado se registrará con fecha, máquina, versión y comando.
 - **Límite conocido:** la paginación acota cada respuesta a 100 resultados como máximo, lo que limita el costo de cada consulta pero no es una medición.
 
-## 8. Pruebas de la Etapa 15 (perfiles y moderación) — pendientes de verificación
+## 8. Pruebas de la Etapa 15 (perfiles y moderación) — verificadas el 28-11-2026
 
 ### 8.1 Automatizadas
 
@@ -139,7 +139,7 @@ La Etapa 15 (perfiles y moderación) **no tiene casos en el plan oficial**; se c
 | Repositorios | Contrato de gestión de eventos y usuarios (mock) y conversión fila ↔ dominio | `mock-management-repository.test.ts`, `postgres-management-mapping.test.ts` |
 | Base real | El contrato de gestión contra PostgreSQL (incluida la transición que no se aplica dos veces) y las restricciones CHECK de la migración 0002: sin revisión no hay publicación, aprobación sin condiciones confirmadas, correo en minúsculas y único | `postgres-management-repository.db.test.ts` (`npm run test:db`) |
 
-**Conteo.** En el entorno de apoyo (sin acceso a npm, con un arnés propio) pasaron **287 pruebas del repositorio**; eso **no equivale** a `npm run test` con Vitest. El conteo esperado con Vitest es de unos 23 archivos y 302 pruebas, **cifra no verificada** hasta que el usuario ejecute el comando. Tampoco se ejecutaron `npm run lint`, `npm run build`, la migración 0002 ni `npm run test:db` con las pruebas nuevas.
+**Conteo.** Verificado en el equipo del usuario el 28-11-2026 (ver §10). Antes, en el entorno de apoyo sin npm, solo había corrido un arnés propio (287 pruebas), que no equivale a Vitest.
 
 ### 8.2 Recorrido manual de aceptación (para el equipo)
 
@@ -176,7 +176,7 @@ Resultados que el usuario obtuvo en su equipo (Windows, Docker Desktop):
 | 11 | 26-10-2026 | `npm run test`: 11 archivos y 77 pruebas; `npm run test:db`: 33 de 33; Docker con 24 eventos y PostGIS 3.5 |
 | 12 y 13 | 30-10-2026 | Lint con 0 errores y 3 avisos; `npm run test`: 15 archivos y 181 pruebas; `npm run test:db`: 60 pruebas; build correcto; revisión visual |
 | 14 | 30-10-2026 y 19-11-2026 | `npm run test`: 16 archivos y 205 pruebas; lint (0 errores, 3 avisos); build; el botón abre Google Maps con las coordenadas del lugar |
-| 15 | — | **Sin verificar** (ver §8) |
+| 15 | 28-11-2026 | Lint con 0 errores y 6 avisos; `npm run test`: 25 archivos y 323 pruebas (incluye 18 del mapa de la Etapa 16); build correcto; migraciones 0001 y 0002 sobre una base nueva; `npm run test:db`: 78 de 78; prueba manual de inicio de sesión, navegación con sesión, revisión y aprobación. Defectos encontrados y corregidos: error de lint (`no-explicit-any`), sesión perdida al cambiar de pantalla sin `SESSION_SECRET`, dos pruebas de contrato que publicaban sin fecha de revisión |
 
 ## 11. Limitaciones y trabajo pendiente
 
@@ -184,4 +184,5 @@ Resultados que el usuario obtuvo en su equipo (Windows, Docker Desktop):
 - Rendimiento y carga: sin ejecución ni umbrales (ver §7).
 - Pruebas de seguridad avanzadas y automatización en integración continua: sin planificar todavía.
 - Los 32 casos del libro oficial siguen en «Pendiente de ejecución»: marcar OK/NOK es una tarea del equipo.
-- Los 3 avisos `react-hooks/set-state-in-effect` registrados el 30-10-2026 son deuda técnica; la Etapa 15 reorganizó el código nuevo para no agregar más, pero **no se confirmó con `npm run lint`**.
+- Los avisos `react-hooks/set-state-in-effect` son deuda técnica: 3 registrados el 30-10-2026 y 3 nuevos de los paneles de la Etapa 15 (`AdminDashboard`, `CreatorDashboard`, `UsersPanel`), confirmados con `npm run lint` el 28-11-2026.
+- Del recorrido manual de §8.2 se informaron los pasos de inicio de sesión, revisión y aprobación; el rechazo, el retiro, el bloqueo por intentos y la desactivación de cuentas quedan cubiertos solo por las pruebas automatizadas.
