@@ -1,0 +1,9 @@
+{
+  "appId": "com.mozak.apt",
+  "appName": "MOZAK",
+  "webDir": "capacitor-www",
+  "server": {
+    "url": "https://REEMPLAZAR-por-tu-proyecto.vercel.app",
+    "cleartext": false
+  }
+}
