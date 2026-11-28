@@ -1,12 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import type { LatLng } from "@/lib/geo";
 import type { ApiManagedEvent } from "@/lib/server/serializers";
 import type { Category, Venue } from "@/types";
 import { ApiError, api, messageOf, type ApiIssue } from "./api-client";
-import { ErrorBanner, Field, cardClasses, inputClasses, primaryButton, secondaryButton } from "./ui";
+import { ErrorBanner, Field, FieldError, cardClasses, inputClasses, labelClasses, primaryButton, secondaryButton } from "./ui";
+
+/** Mapa para marcar el lugar (Etapa 16). Leaflet necesita `window`: se carga solo en el navegador. */
+const LocationPicker = dynamic(() => import("@/components/map/LocationPicker"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-64 items-center justify-center rounded-lg border border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+      Cargando mapa…
+    </div>
+  ),
+});
 
 interface FormState {
   title: string;
@@ -57,6 +69,20 @@ const emptyForm: FormState = {
 };
 
 const toNumber = (value: string): number => (value.trim() === "" ? Number.NaN : Number(value.replace(",", ".")));
+
+/** Ubicación marcada en el formulario, o null si todavía no se marca. */
+function pickedLocation(latitude: string, longitude: string): LatLng | null {
+  const lat = toNumber(latitude);
+  const lng = toNumber(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { latitude: lat, longitude: lng };
+}
+
+const GEOLOCATION_ERRORS: Record<number, string> = {
+  1: "No diste permiso para usar tu ubicación. Márcala tocando el mapa.",
+  2: "No se pudo obtener tu ubicación. Márcala tocando el mapa.",
+  3: "Se agotó el tiempo para obtener tu ubicación. Márcala tocando el mapa.",
+};
 
 function toPayload(form: FormState): Record<string, unknown> {
   const venue =
@@ -145,6 +171,8 @@ export function EventForm({ eventId }: EventFormProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -177,8 +205,40 @@ export function EventForm({ eventId }: EventFormProps) {
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((current) => ({ ...current, [key]: value }));
 
+  const picked = useMemo(() => pickedLocation(form.venueLatitude, form.venueLongitude), [form.venueLatitude, form.venueLongitude]);
+
+  /** Guarda el punto marcado con 6 decimales (unos 11 cm), que es más que suficiente. */
+  const setLocation = (point: LatLng) => {
+    setLocationError(null);
+    setForm((current) => ({ ...current, venueLatitude: point.latitude.toFixed(6), venueLongitude: point.longitude.toFixed(6) }));
+  };
+
+  const locateMe = () => {
+    if (!window.isSecureContext || !("geolocation" in navigator)) {
+      setLocationError("Tu navegador solo comparte la ubicación con https o en localhost. Márcala tocando el mapa.");
+      return;
+    }
+    setLocating(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocating(false);
+        setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+      },
+      (geoError) => {
+        setLocating(false);
+        setLocationError(GEOLOCATION_ERRORS[geoError.code] ?? GEOLOCATION_ERRORS[2] ?? null);
+      },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
+    );
+  };
+
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (form.venueMode === "new" && !picked) {
+      setLocationError("Marca en el mapa dónde será el evento.");
+      return;
+    }
     setBusy(true);
     setError(null);
     setFieldErrors({});
@@ -299,12 +359,23 @@ export function EventForm({ eventId }: EventFormProps) {
             <Field label="Ciudad" htmlFor="ev-vcity" error={err.venueCity}>
               <input id="ev-vcity" className={inputClasses} value={form.venueCity} onChange={(e) => set("venueCity", e.target.value)} required />
             </Field>
-            <Field label="Latitud" htmlFor="ev-vlat" error={err.venueLatitude} hint="En Google Maps: clic derecho sobre el lugar y copia las coordenadas (ej. -33.4489).">
-              <input id="ev-vlat" inputMode="decimal" className={inputClasses} value={form.venueLatitude} onChange={(e) => set("venueLatitude", e.target.value)} required />
-            </Field>
-            <Field label="Longitud" htmlFor="ev-vlng" error={err.venueLongitude} hint="Ej. -70.6693.">
-              <input id="ev-vlng" inputMode="decimal" className={inputClasses} value={form.venueLongitude} onChange={(e) => set("venueLongitude", e.target.value)} required />
-            </Field>
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <span className={labelClasses}>Ubicación en el mapa</span>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Toca el mapa donde será el evento; puedes arrastrar el marcador para ajustarlo. Si estás en el lugar, usa tu ubicación actual.
+                Con este punto el evento aparece en el mapa de la aplicación.
+              </p>
+              <LocationPicker value={picked} onChange={setLocation} disabled={disabled} />
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="button" className={secondaryButton} onClick={locateMe} disabled={disabled || locating}>
+                  {locating ? "Buscando tu ubicación…" : "Usar mi ubicación actual"}
+                </button>
+                <span className="text-xs text-gray-500 dark:text-gray-400" aria-live="polite">
+                  {picked ? `Lugar marcado (${picked.latitude.toFixed(5)}, ${picked.longitude.toFixed(5)})` : "Aún no has marcado el lugar."}
+                </span>
+              </div>
+              <FieldError message={locationError ?? err.venueLatitude ?? err.venueLongitude} />
+            </div>
           </div>
         )}
       </fieldset>

@@ -104,7 +104,7 @@ Códigos: `401` sin sesión, `403` perfil sin permiso o CSRF, `404` no existe o 
 - Contador de intentos de ingreso en memoria (por instancia).
 - Sin cambio ni recuperación de contraseña (el administrador crea la cuenta con una contraseña inicial).
 - Los eventos de catálogo (anteriores a esta etapa, sin creador) que un administrador retira de la publicación no se pueden volver a publicar desde la interfaz.
-- Las coordenadas de un recinto nuevo se ingresan a mano; no se suben imágenes (solo enlaces).
+- Desde la Etapa 16, el lugar de un recinto nuevo se marca en un mapa (ver [`MAPA.md`](MAPA.md)); no se suben imágenes (solo enlaces).
 - La revisión automática es por palabras clave (ver §3).
 - Esta etapa **no** incluye lo marcado como pendiente por el equipo: validación de negocio/SaaS, política de legalidad de fuentes de ingesta, política de privacidad y datos, reorganización de la presentación por sprint y ampliación de la encuesta.
 

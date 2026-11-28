@@ -24,6 +24,7 @@
 | [`DIAGRAMAS-UML.md`](DIAGRAMAS-UML.md) | Casos de uso, clases y secuencia |
 | [`DOCUMENTACION-TECNICA.md`](DOCUMENTACION-TECNICA.md) | Arquitectura, API, pruebas por etapa y decisiones |
 | [`ROLES-Y-MODERACION.md`](ROLES-Y-MODERACION.md) | Perfiles, ciclo de vida del evento y política de contenido (Etapa 15) |
+| [`MAPA.md`](MAPA.md) | Mapa de eventos cercanos y ubicación marcada en el mapa (Etapa 16, sin verificar) |
 
 ## Pruebas y operación
 
