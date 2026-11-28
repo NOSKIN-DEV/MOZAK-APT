@@ -66,7 +66,29 @@ export function verifySessionToken(token: string, secret: string, now: Date = ne
   }
 }
 
-let ephemeralSecret: string | undefined;
+const EPHEMERAL_SECRET_KEY = Symbol.for("mozak.ephemeralSessionSecret");
+
+/**
+ * Secreto temporal del proceso, compartido por todas las copias de este módulo.
+ *
+ * Se guarda en globalThis (igual que el MemoryStore) porque Next.js carga este
+ * módulo más de una vez en el mismo proceso: las páginas y las rutas de la API se
+ * compilan por separado. Con una variable del módulo, cada copia tenía su propio
+ * secreto y la sesión firmada al iniciar sesión no se reconocía en la pantalla
+ * siguiente (error informado en la verificación del 28-11-2026).
+ */
+function ephemeralSecret(): string {
+  const holder = globalThis as unknown as Record<symbol, string | undefined>;
+  let secret = holder[EPHEMERAL_SECRET_KEY];
+  if (!secret) {
+    secret = randomBytes(32).toString("hex");
+    holder[EPHEMERAL_SECRET_KEY] = secret;
+    console.warn(
+      "[auth] SESSION_SECRET no está definido: se usa un secreto temporal; las sesiones se perderán al reiniciar el servidor.",
+    );
+  }
+  return secret;
+}
 
 /**
  * Secreto de firma de las sesiones, desde SESSION_SECRET (mínimo 32 caracteres).
@@ -79,13 +101,7 @@ let ephemeralSecret: string | undefined;
 export function resolveSessionSecret(raw: string | undefined = process.env.SESSION_SECRET): string {
   const value = (raw ?? "").trim();
   if (value === "") {
-    if (!ephemeralSecret) {
-      ephemeralSecret = randomBytes(32).toString("hex");
-      console.warn(
-        "[auth] SESSION_SECRET no está definido: se usa un secreto temporal; las sesiones se perderán al reiniciar el servidor.",
-      );
-    }
-    return ephemeralSecret;
+    return ephemeralSecret();
   }
   if (value.length < MIN_SECRET_LENGTH) {
     throw new Error(`SESSION_SECRET debe tener al menos ${MIN_SECRET_LENGTH} caracteres.`);
