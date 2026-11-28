@@ -97,6 +97,13 @@ export class MockEventManagementRepository implements EventManagementRepository 
     if (!event || !request.from.includes(event.status)) {
       return null;
     }
+    // Misma regla que la restricción event_published_reviewed_chk de PostgreSQL
+    // (migración 0002): un evento de un creador solo queda publicado con fecha de
+    // revisión. Se comprueba antes de cambiar nada, como haría la base.
+    const nextReviewedAt = request.set && request.set.reviewedAt !== undefined ? request.set.reviewedAt : event.reviewedAt;
+    if (event.createdById && request.to === "PUBLISHED" && !nextReviewedAt) {
+      throw new Error("Un evento de un creador no se puede publicar sin fecha de revisión (event_published_reviewed_chk).");
+    }
     event.status = request.to;
     event.updatedAt = request.at;
     if (request.set) {

@@ -236,7 +236,7 @@ export function defineManagementRepositoryContract(setup: () => Promise<Manageme
       const id = uid("event");
       await management.createEvent({ id, content: content(), sourceId: "source-organizadores", createdById: creator.id, at: NOW });
       await management.transition({ id, from: ["DRAFT"], to: "PENDING_REVIEW", at: NOW });
-      await management.transition({ id, from: ["PENDING_REVIEW"], to: "PUBLISHED", review: review(id, admin.id), at: LATER });
+      await management.transition({ id, from: ["PENDING_REVIEW"], to: "PUBLISHED", set: { reviewedAt: LATER }, review: review(id, admin.id), at: LATER });
 
       const second = await management.transition({
         id,
@@ -249,6 +249,21 @@ export function defineManagementRepositoryContract(setup: () => Promise<Manageme
       expect((await management.findManagedById(id))?.status).toBe("PUBLISHED");
       expect((await management.listReviews(id)).map((r) => r.decision)).toEqual(["APPROVED"]);
       expect(await management.transition({ id: "ctest-no-existe", from: ["DRAFT"], to: "PENDING_REVIEW", at: LATER })).toBeNull();
+    });
+
+    it("un evento de un creador no se puede publicar sin fecha de revisión (misma regla que la base de datos)", async () => {
+      const { management, users } = await setup();
+      const creator = await newUser(users, "CREATOR");
+      const admin = await newUser(users, "ADMIN");
+      const id = uid("event");
+      await management.createEvent({ id, content: content(), sourceId: "source-organizadores", createdById: creator.id, at: NOW });
+      await management.transition({ id, from: ["DRAFT"], to: "PENDING_REVIEW", at: NOW });
+
+      await expect(
+        management.transition({ id, from: ["PENDING_REVIEW"], to: "PUBLISHED", review: review(id, admin.id), at: LATER }),
+      ).rejects.toThrow();
+      expect((await management.findManagedById(id))?.status).toBe("PENDING_REVIEW");
+      expect(await management.listReviews(id)).toEqual([]);
     });
 
     it("rechazar y retirar: el evento deja de ser público y el historial conserva todas las decisiones, la más reciente primero", async () => {
@@ -324,7 +339,7 @@ export function defineManagementRepositoryContract(setup: () => Promise<Manageme
       expect(await publicEvents.findAllCommunes()).not.toContain("Zzcomuna Ficticia");
       await management.transition({ id, from: ["DRAFT"], to: "PENDING_REVIEW", at: NOW });
       expect(await publicEvents.findAllCommunes()).not.toContain("Zzcomuna Ficticia");
-      await management.transition({ id, from: ["PENDING_REVIEW"], to: "PUBLISHED", review: review(id, admin.id), at: LATER });
+      await management.transition({ id, from: ["PENDING_REVIEW"], to: "PUBLISHED", set: { reviewedAt: LATER }, review: review(id, admin.id), at: LATER });
       expect(await publicEvents.findAllCommunes()).toContain("Zzcomuna Ficticia");
       expect((await publicEvents.findAll({ commune: "Zzcomuna Ficticia" })).map((e) => e.id)).toEqual([id]);
     });
