@@ -6,8 +6,8 @@ Pedido del usuario del 28-11-2026: que la aplicación tenga una vista de mapa, a
 
 | Historia | Qué cubre | Puntos (propuesta) |
 |---|---|---|
-| HU-31 | Vista de mapa con los eventos publicados como puntos, ubicación del usuario y ficha al tocar un punto | 8 |
-| HU-32 | El creador marca el lugar de un recinto nuevo tocando un mapa, en lugar de escribir coordenadas | 3 |
+| HU-31 (MA-55) | Vista de mapa con los eventos publicados como puntos, ubicación del usuario y ficha al tocar un punto | 8 |
+| HU-32 (MA-56) | El creador marca el lugar de un recinto nuevo tocando un mapa, en lugar de escribir coordenadas | 3 |
 
 ## Qué ve el público
 

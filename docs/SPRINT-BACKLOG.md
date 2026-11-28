@@ -80,8 +80,8 @@ Los objetivos de los Sprints 1, 2, 3, 5 y 6 son los de la descripción de su ép
 | MA-31 | HU-25 | Búsqueda de eventos por proximidad (PostGIS): ver eventos cercanos a la ubicación del usuario | 8 | Por hacer |
 | MA-48 | HU-29 | Dejar de usar datos mock: la API y el frontend leen solo del repositorio real; carga inicial de eventos reales; Docker Compose levanta app + base sin pasos manuales | 5 | Por hacer (depende de HU-20 y HU-24) |
 | MA-49 | HU-30 | Perfiles de creador y administrador con aprobación de eventos dentro de la norma | 13 (propuesta) | Implementada en la rama `feature/roles-moderacion`; **pendiente de verificación** |
-| (por crear) | HU-31 | Vista de mapa con los eventos como puntos de interés, ubicación del usuario y ficha al tocar un punto | 8 (propuesta) | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
-| (por crear) | HU-32 | El creador marca el lugar en un mapa en vez de escribir coordenadas | 3 (propuesta) | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
+| MA-55 | HU-31 | Vista de mapa con los eventos como puntos de interés, ubicación del usuario y ficha al tocar un punto | 8 (propuesta) | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
+| MA-56 | HU-32 | El creador marca el lugar en un mapa en vez de escribir coordenadas | 3 (propuesta) | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
 
 Subtareas de HU-30: MA-50 (migración 0002), MA-51 (autenticación y sesiones), MA-52 (flujo de moderación, política y API) y MA-53 (pantallas y documentación). Detalle técnico y pasos de verificación: [`ROLES-Y-MODERACION.md`](ROLES-Y-MODERACION.md).
 
