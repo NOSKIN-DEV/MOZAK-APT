@@ -41,6 +41,8 @@
 | HU-25 | MA-31 | Búsqueda de eventos por proximidad (PostGIS) | 8 | — | 5 | Por hacer |
 | HU-29 | MA-48 | Dejar de usar datos mock (pedido del usuario; depende de HU-20 y HU-24) | 5 | — | 5 | Por hacer |
 | HU-30 | MA-49 | Perfiles de creador y administrador con aprobación de eventos dentro de la norma (pedido del usuario) | 13 (propuesta) | 15 | 5 | **Implementada en la rama `feature/roles-moderacion`; pendiente de verificación** (Jira: Por hacer) |
+| HU-31 | (por crear) | Vista de mapa con los eventos como puntos, ubicación del usuario y ficha al tocar un punto (pedido del usuario) | 8 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
+| HU-32 | (por crear) | El creador marca el lugar en un mapa en vez de escribir latitud y longitud (pedido del usuario) | 3 (propuesta) | 16 | 5 | Implementada en la rama `feature/mapa-eventos`; **sin verificar** |
 | HU-26 | MA-32 | Rendimiento y pruebas E2E | 5 | — | 6 | Por hacer |
 | HU-27 | MA-33 | Versión Android | 8 | — | 6 | Por hacer |
 
@@ -95,6 +97,7 @@ La Etapa 12 (actualización de seguridad de Next.js 16.4.1 y migración de ESLin
 | 19-11-2026 | HU-29 pasa del Sprint 4 al Sprint 5 | Depende de la ingesta de fuentes externas (HU-24) |
 | 19-11-2026 | HU-28 cerrada tras su verificación visual | Etapa 14 verificada |
 | 23-11-2026 | Se agrega HU-30 (perfiles de creador y administrador, moderación) al Sprint 5 | Pedido del usuario: el consumidor sigue sin cuenta; solo el administrador publica. Cambia el alcance acordado «sin inicio de sesión ni roles» |
+| 28-11-2026 | Se agregan HU-31 (vista de mapa) y HU-32 (ubicación marcada en el mapa) al Sprint 5 | Pedido del usuario: geo-referenciación para usar la aplicación en el teléfono, con los eventos como puntos de interés. Relacionadas con HU-25 (proximidad) y HU-27 (Android) |
 | 24-11-2026 | Se registra la tarea MA-54 (cerrar brechas de documentación de la evaluación) en el Sprint 5, sin puntos | Pedido del usuario; no es una historia de producto, por eso no cambia el total de puntos |
 
 ## Fuera de alcance por ahora

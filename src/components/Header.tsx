@@ -20,9 +20,12 @@ export function Header({ searchValue, onSearchChange, onSearchSubmit }: HeaderPr
             MOZAK
           </Link>
           <div className="flex items-center gap-3 sm:hidden">
-            <nav className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            <nav className="flex gap-3 text-sm font-medium text-gray-600 dark:text-gray-300">
               <Link href="/" className="hover:text-gray-900 dark:hover:text-gray-50">
                 Inicio
+              </Link>
+              <Link href="/mapa" className="hover:text-gray-900 dark:hover:text-gray-50">
+                Mapa
               </Link>
             </nav>
             <Link href="/ingresar" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50">
@@ -33,9 +36,12 @@ export function Header({ searchValue, onSearchChange, onSearchSubmit }: HeaderPr
         </div>
 
         <div className="flex items-center gap-4 sm:flex-1 sm:justify-end">
-          <nav className="hidden shrink-0 text-sm font-medium text-gray-600 dark:text-gray-300 sm:block">
+          <nav className="hidden shrink-0 gap-4 text-sm font-medium text-gray-600 dark:text-gray-300 sm:flex">
             <Link href="/" className="hover:text-gray-900 dark:hover:text-gray-50">
               Inicio
+            </Link>
+            <Link href="/mapa" className="hover:text-gray-900 dark:hover:text-gray-50">
+              Mapa
             </Link>
           </nav>
           <Link href="/ingresar" className="hidden shrink-0 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50 sm:block">
